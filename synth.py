@@ -4,6 +4,7 @@ from music21 import *
 import soundfile as sf
 from generators import Generators
 import effects
+import pyloudnorm as pyln
 
 
 class Notes:
@@ -31,31 +32,37 @@ class Notes:
 
 
 def main():
-    # path = '../input/midi1.mid'
-    # notes = Notes(path)
-    # fs = 44100
-    # numOfHarmonics = 40
-    #
-    # synth1 = Generators(notes, fs)
-    # sound = synth1.make_sound('sine', numOfHarmonics)
 
-    sound, fs = sf.read('../input/melody.wav')
-    sound = sound[:, 0]
+    print("Getting notes from Midi....")
+    path = '../input/kiss.mid'
+    notes = Notes(path)
+    fs = 48000
+    numOfHarmonics = 20
+
+    print("Generating sound....")
+    synth1 = Generators(notes, fs)
+    sound = synth1.make_sound('square', numOfHarmonics)
+
+    print("Setting loudness to -12 LUFS....")
+    #set loudness to -12 LUFS
+    meter = pyln.Meter(fs)
+    loudness = meter.integrated_loudness(sound)
+    sound = pyln.normalize.loudness(sound, loudness, -24.0)
 
     fx = effects.Effects(sound, fs)
-    melody_chorus = fx.chorus()
+    melody_chorus = fx.chorus(fmod=1.5)
     melody_flanger = fx.flanger()
     melody_vibrato = fx.vibrato()
     melody_echo = fx.echo()
-    melody_reverb = fx.conv_reverb('impulses/Cathey_learning_center.wav')
-
+    melody_reverb = fx.conv_reverb('impulses/Saieh_hallway.wav', 0.2)
+    print("Writing out file....")
     sf.write('../output/melody_dry.wav', sound, fs)
     sf.write('../output/melody_chorus.wav', melody_chorus, fs)
     sf.write('../output/melody_flanger.wav', melody_flanger, fs)
     sf.write('../output/melody_vibrato.wav', melody_vibrato, fs)
     sf.write('../output/melody_echo.wav', melody_echo, fs)
     sf.write('../output/melody_reverb.wav', melody_reverb, fs)
-
+    print("Done!!")
 
 if __name__ == '__main__':
     main()

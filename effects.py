@@ -2,7 +2,7 @@
 
 import numpy as np
 import math
-import scipy.signal
+from scipy.signal import fftconvolve
 import soundfile as sf
 
 
@@ -58,16 +58,12 @@ class Effects:
         self.data = data
         self.sampling_rate = sampling_rate
 
-    def chorus(self):
+    def chorus(self, fmod=1.5, A=0.002, M=0.002, BL=1.0, FF=0.7):
+
         # Simple Chorus
-
         x = LinearWrap(self.data)
-
-        fmod = 1.5
-        A = int(0.002 * self.sampling_rate)
-        M = int(0.002 * self.sampling_rate)
-        BL = 1.0
-        FF = 0.7
+        A = int(A * self.sampling_rate)
+        M = int(M * self.sampling_rate)
 
         if A > M:
             raise RuntimeError("Amplitude of vibrato too high for delay length")
@@ -185,26 +181,25 @@ class Effects:
 
         return y
 
-    # def conv_reverb(self, impulse_path):
-    #
-    #     impulse = sf.read(impulse_path, self.sampling_rate)[0]
-    #     impulse = impulse[:, 0]
-    #     reverb_output = scipy.signal.convolve(self.data, impulse)
-    #     return reverb_output
-
-    def conv_reverb(self, impulse_path, amount_verb=0.015):
+    def conv_reverb(self, impulse_path, amount_verb=0.2):
 
         impulse = sf.read(impulse_path, self.sampling_rate)[0]
         impulse = impulse[:, 0]
-        x = self.data
+        dry_signal = self.data
         L, P = len(self.data), len(impulse)
         h_zp = np.append(impulse, np.zeros(L-1))
-        x_zp = np.append(x, np.zeros(P-1))
+        x_zp = np.append(dry_signal, np.zeros(P-1))
         X = np.fft.fft(x_zp)
 
-        output = np.fft.ifft(X * np.fft.fft(h_zp)).real
-        output = amount_verb * output + x_zp
+        convolved_wave = np.fft.ifft(X * np.fft.fft(h_zp)).real
+        wet_signal = (convolved_wave / np.abs(np.max(convolved_wave))) * amount_verb
 
-        return output
+        if len(dry_signal) < len(wet_signal):
+            pad_length = np.abs(len(dry_signal) - len(wet_signal))
+            dry_signal = np.pad(dry_signal, (0, pad_length), 'constant')
+        elif len(wet_signal) < len(dry_signal):
+            pad_length = np.abs(len(dry_signal) - len(wet_signal))
+            wet_signal = np.pad(wet_signal, (0, pad_length), 'constant')
 
+        return dry_signal + wet_signal + x_zp
 
