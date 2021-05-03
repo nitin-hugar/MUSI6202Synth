@@ -1,10 +1,37 @@
 # synth interface for pre-processing CLI arguments, reading MIDI, ADSR and triggering Synth engines
 
 from music21 import *
-import soundfile as sf
 from generators import Generators
 import effects
 import pyloudnorm as pyln
+import matplotlib.pyplot as plt
+import argparse
+import soundfile as sf
+
+SAMPLING_RATE = 48000
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="DSP Synth Implementation")
+
+    subparsers = parser.add_subparsers(help='commands')
+
+    parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
+    parser.add_argument('-w', '--wavetype', type=str, metavar='', required=True, help='Type of wave')
+
+    # Effects Group
+    fx = subparsers.add_parser('effects', help='Add effects to the sound')
+    # action=true stores false until the value is called
+    fx.add_argument('-c', '--chorus', action='store_true', help='Add Chorus')
+    fx.add_argument('-f', '--flanger', action='store_true', help='Add Flanger')
+    fx.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
+    fx.add_argument('-e', '--echo', action='store_true', help='Add Echo')
+    fx.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
+
+
+
+    print(parser.parse_args())
+    return parser.parse_args()
 
 
 class Notes:
@@ -31,38 +58,38 @@ class Notes:
         return notenames, durations, frequencies
 
 
-def main():
+if __name__ == '__main__':
+    args = parse_arguments()
 
+    # Get the imput midi file:
     print("Getting notes from Midi....")
-    path = '../input/kiss.mid'
+    path = args.input
     notes = Notes(path)
-    fs = 48000
-    numOfHarmonics = 20
 
+    # Generate sound
     print("Generating sound....")
-    synth1 = Generators(notes, fs)
-    sound = synth1.make_sound('square', numOfHarmonics)
+    numOfHarmonics = 20
+    synth = Generators(notes, SAMPLING_RATE)
+    sound = synth.make_sound(args.wavetype, numOfHarmonics)
 
+    # set loudness to -12 LUFS
     print("Setting loudness to -12 LUFS....")
-    #set loudness to -12 LUFS
-    meter = pyln.Meter(fs)
+    meter = pyln.Meter(SAMPLING_RATE)
     loudness = meter.integrated_loudness(sound)
     sound = pyln.normalize.loudness(sound, loudness, -24.0)
 
-    fx = effects.Effects(sound, fs)
-    melody_chorus = fx.chorus(fmod=1.5)
-    melody_flanger = fx.flanger()
-    melody_vibrato = fx.vibrato()
-    melody_echo = fx.echo()
-    melody_reverb = fx.conv_reverb('impulses/Saieh_hallway.wav', 0.2)
-    print("Writing out file....")
-    sf.write('../output/melody_dry.wav', sound, fs)
-    sf.write('../output/melody_chorus.wav', melody_chorus, fs)
-    sf.write('../output/melody_flanger.wav', melody_flanger, fs)
-    sf.write('../output/melody_vibrato.wav', melody_vibrato, fs)
-    sf.write('../output/melody_echo.wav', melody_echo, fs)
-    sf.write('../output/melody_reverb.wav', melody_reverb, fs)
-    print("Done!!")
+    fx = effects.Effects(sound, SAMPLING_RATE)
 
-if __name__ == '__main__':
-    main()
+    for key, value in vars(args).items():
+        if key == 'chorus' and value is True:
+            fx.chorus()
+        elif key == 'flanger' and value is True:
+            fx.flanger()
+        elif key == 'vibrato' and value is True:
+            fx.flanger()
+        elif key == 'reverb' and value is True:
+            fx.conv_reverb('impulses/UChurch.wav')
+
+    sf.write('../output/output.wav', fx.data, SAMPLING_RATE)
+
+    print("Done!!")

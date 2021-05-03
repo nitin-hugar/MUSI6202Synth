@@ -2,7 +2,6 @@
 
 import numpy as np
 import math
-from scipy.signal import fftconvolve
 import soundfile as sf
 
 
@@ -85,7 +84,7 @@ class Effects:
             while phi >= 1:
                 phi -= 1
 
-        return y
+        self.data = y
 
     # Simple Flanger
     def flanger(self):
@@ -118,7 +117,7 @@ class Effects:
             while phi >= 1:
                 phi -= 1
 
-        return y
+        self.data = y
 
     # Modulated Echo (Vibrato)
     def vibrato(self):
@@ -144,7 +143,7 @@ class Effects:
             while phi >= 1:
                 phi -= 1
 
-        return y
+        self.data = y
 
     # Simple Echo
     def echo(self):
@@ -179,7 +178,7 @@ class Effects:
             while phi >= 1:
                 phi -= 1
 
-        return y
+        self.data = y
 
     def conv_reverb(self, impulse_path, amount_verb=0.2):
 
@@ -201,5 +200,4 @@ class Effects:
             pad_length = np.abs(len(dry_signal) - len(wet_signal))
             wet_signal = np.pad(wet_signal, (0, pad_length), 'constant')
 
-        return dry_signal + wet_signal + x_zp
-
+        self.data = dry_signal + wet_signal + x_zp
