@@ -2,6 +2,7 @@
 
 from generators import Generators
 import effects
+import filters
 import pyloudnorm as pyln
 import matplotlib.pyplot as plt
 from utils import *
@@ -32,6 +33,7 @@ if __name__ == '__main__':
     sound = pyln.normalize.loudness(sound, loudness, -24.0)
 
     fx = effects.Effects(sound, SAMPLING_RATE)
+    filt = filters.Filters(sound, SAMPLING_RATE)
 
     for key, value in vars(args).items():
         if key == 'chorus' and value is True:
@@ -119,7 +121,19 @@ if __name__ == '__main__':
             else:
                 raise ValueError("Enter 'y' or 'n'")
 
+        elif key == 'lowpass' and value is True:
+            val = input("Enter lowpass filter parameters? (y/n): ")
+            if val == 'y':
+                resonance = float(input("Resonance: "))
+                cutoff_freq = float(input("Cutoff Frequency: "))
+            elif val == 'n':
+                print("Adding Lowpass filter...")
+                filt.biquad()
+                print('Lowpass filter added')
+            else:
+                raise ValueError("Enter 'y' or 'n'")
 
-    sf.write('output/output.wav', fx.data, SAMPLING_RATE)
+
+    sf.write('output/output.wav', filt.data, SAMPLING_RATE)
 
     print("Done!!")

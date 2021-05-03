@@ -15,7 +15,6 @@ def parse_arguments():
     parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
     # Granular:
 
-
     # Effects Group
     fx = subparsers.add_parser('effects', help='Add effects to the sound')
     # action=true stores false until the value is called
@@ -24,6 +23,12 @@ def parse_arguments():
     fx.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
     fx.add_argument('-e', '--echo', action='store_true', help='Add Echo')
     fx.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
+
+    #Filters Group
+    filt = subparsers.add_parser('filters', help='Add filter to the sound')
+
+    filt.add_argument('-lp', '--lowpass', action='store_true', help='Add lowpass filter')
+    filt.add_argument('-hp', '--hipass', action='store_true', help='Add hipass filter')
 
     return parser.parse_args()
 
