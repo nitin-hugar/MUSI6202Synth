@@ -3,7 +3,7 @@
 import numpy as np
 import math
 import soundfile as sf
-import util
+import utils
 
 class Effects:
     def __init__(self, data, sampling_rate):
@@ -22,7 +22,7 @@ class Effects:
         """
 
         # Simple Chorus
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
 
@@ -32,7 +32,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -60,7 +60,7 @@ class Effects:
            :return: data with flanger added
          """
 
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
 
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
@@ -71,7 +71,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -97,11 +97,11 @@ class Effects:
         :return: data with vibrato added
         """
 
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
 
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
 
         deltaPhi = fmod / self.sampling_rate
         phi = 0
@@ -122,12 +122,16 @@ class Effects:
     def echo(self, fmod=0, A=0, M=0.05, BL=0.7, FF=0.7):
         """
 
+<<<<<<< HEAD
            :param fmod: frequency modulation
            :param A: amplitude of modulation
            :param M: delay time
            :param BL: blend
            :param FF: feed forward
            :return: data with chorus added
+=======
+        x = utils.LinearWrap(self.data)
+>>>>>>> 6b47b9a82f132754bca3c6e6a9e46ff26e1e7ed4
 
          """
 
@@ -140,7 +144,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
