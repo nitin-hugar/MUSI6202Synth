@@ -1,6 +1,5 @@
 # Functions are all filters
 import numpy as np
-import math
 import utils
 
 class Filters:
@@ -15,6 +14,7 @@ class Filters:
 
         maxDelaySamps = 2  # Only need last two samples for second order biquad
         outputSamps = len(x) + maxDelaySamps
+        delaySamps = 2
         y = np.zeros(outputSamps)
         ringBuf = utils.LinearRingBuffer(maxDelaySamps)
 
@@ -36,11 +36,19 @@ class Filters:
             b1 = 2.0 * (c * c - 1.0) * a1
             b2 = (1.0 - resonance * c + c * c) * a1
 
-        for i in range(outputSamps):
-            s = x[i]
-            ringBuf.pushSample(s)
-            y[i] = s * BL + ringBuf.delayedSample(delaySamps) * FF
+        for i in range(0, outputSamps):
+            current_sample = x[i]
+            ringBuf.pushSample(current_sample)
 
-            phi = phi + deltaPhi
-            while phi >= 1:
-                phi -= 1
+            if i == 0:
+                y[i] = a1 * x[i]
+
+            elif i == 1:
+                y[i] = a1 * x[i] + a2 * x[i - 1] + a3 * x[i - 2]
+
+            else:
+                y[i] = a1 * x[i] + a2 * x[i-1] + a3 * x[i-2] \
+                       - b1 * y[i-1] - b2 * y[i-2]
+
+        self.data = y
+
