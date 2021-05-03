@@ -12,17 +12,14 @@ def parse_arguments():
     # Additive:
     parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
     parser.add_argument('-w', '--wavetype', type=str, metavar='', required=True, help='Type of wave')
-
+    parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
     # Granular:
 
-    # ADSR:
-    envelope = subparsers.add_parser('ADSR', help='Add ADSR envelope')
-    envelope.add_argument('--envelope', nargs="+", type=float, help='Add ADSR Envolope')
 
     # Effects Group
     fx = subparsers.add_parser('effects', help='Add effects to the sound')
     # action=true stores false until the value is called
-    fx.add_argument('-c', '--chorus', action='store_true', help='Add Chorus')
+    fx.add_argument('-c', '--chorus',action='store_true', help='Add Chorus')
     fx.add_argument('-f', '--flanger', action='store_true', help='Add Flanger')
     fx.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
     fx.add_argument('-e', '--echo', action='store_true', help='Add Echo')

@@ -18,7 +18,7 @@ def adsr(sound, envelope):
   -------
     ADSR Envelop
   """
-    a, d, s, r = envelope[:]
+    a, d, s, r = envelope
 
     attack = a * sampling_rate
     decay = d * sampling_rate
