@@ -3,7 +3,7 @@
 import numpy as np
 import math
 import soundfile as sf
-import util
+import utils
 
 class Effects:
     def __init__(self, data, sampling_rate):
@@ -13,7 +13,7 @@ class Effects:
     def chorus(self, fmod=1.5, A=0.002, M=0.002, BL=1.0, FF=0.7):
 
         # Simple Chorus
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
 
@@ -23,7 +23,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -42,7 +42,7 @@ class Effects:
     # Simple Flanger
     def flanger(self):
 
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
 
         fmod = 0.2
         A = int(0.002 * self.sampling_rate)
@@ -56,7 +56,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -75,12 +75,12 @@ class Effects:
     # Modulated Echo (Vibrato)
     def vibrato(self):
 
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
 
         maxDelaySamps = 200
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
 
         fmod = 1
         deltaPhi = fmod / self.sampling_rate
@@ -101,7 +101,7 @@ class Effects:
     # Simple Echo
     def echo(self):
 
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
 
         output = '../output/sv_simpleEcho2.wav'
 
@@ -117,7 +117,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
