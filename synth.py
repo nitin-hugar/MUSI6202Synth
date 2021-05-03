@@ -26,27 +26,21 @@ if __name__ == '__main__':
     partials = []
     coefficients = []
     for key, value in vars(args).items():
-        if key == 'partials' and value is True:
-            val = input("Enter values of partials? (y/n): ")
+        if key == 'additive' and value is True:
+            val = input("Enter values of partials and Cofficients? (y/n): ")
             if val == 'y':
-                partials  = input("Enter a space-separated list of partials: ").split()
+                partials = input("Enter a space-separated list of partials: ").split()
                 partials = list(map(float, partials))
-            elif val == 'n':
-                partials=[1,2,3,4]
-                print("Adding default partials: ",partials)
-                
-        elif key == 'coefficients' and value is True:
-            val = input("Enter values of coefficients? (y/n): ")
-            if val == 'y':
-                coefficients  = input("Enter a space-separated list of partials: ").split()
-                
+                coefficients = input("Enter a space-separated list of partials: ").split()
                 coefficients = list(map(float, coefficients))
             elif val == 'n':
-                coefficients= [1] * len(partials)
-                print("Adding default coefficients: ",coefficients)
+                partials=[1, 2, 3, 4]
+                print("Adding default partials: ", partials)
+                coefficients = [1] * len(partials)
+                print("Adding default coefficients: ", coefficients)
+
     print(partials, coefficients)
-    if (len(partials) == len(coefficients)):
-        
+    if len(partials) == len(coefficients):
         sound = synth.make_sound(args.envelope, partials, coefficients)
     else:
         raise ValueError("Number of partials not equal to number of coefficeints")
@@ -149,16 +143,13 @@ if __name__ == '__main__':
     # Down sampling and Down quantization
     sound = np.asarray(fx.data, dtype=np.int32)
     sound = sound.astype(np.int32)
-    # write(wave_file_path, fs, data)
 
     output = Downsampler()
     res = sound
 
     if args.samplerate is not None:
         output.output_fs = int(args.samplerate)
-
         down_factor = ceil(SAMPLING_RATE / float(output.output_fs))
-        print(down_factor)
         t = len(sound) / SAMPLING_RATE
         down_sampled_data = output.down_sample(sound, down_factor, output.output_fs, SAMPLING_RATE)
         res = output.up_sample(down_sampled_data, int(SAMPLING_RATE / down_factor), output.output_fs, t)
@@ -166,7 +157,5 @@ if __name__ == '__main__':
     if args.bitrate is not None:
         output.output_br = int(args.bitrate)
         dq1 = output.down_quantization(res, 32, output.output_br)
-
-    sf.write('output/output.wav', fx.data, SAMPLING_RATE)
 
     print("Done!!")
