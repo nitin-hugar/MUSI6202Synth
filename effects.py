@@ -11,6 +11,15 @@ class Effects:
         self.sampling_rate = sampling_rate
 
     def chorus(self, fmod=1.5, A=0.002, M=0.002, BL=1.0, FF=0.7):
+        """
+
+        :param fmod: frequency modulation
+        :param A: amplitude of modulation
+        :param M: delay time
+        :param BL: blend
+        :param FF: feed forward
+        :return: data with chorus added
+        """
 
         # Simple Chorus
         x = util.LinearWrap(self.data)
@@ -41,6 +50,15 @@ class Effects:
 
     # Simple Flanger
     def flanger(self, fmod=0.2, A=0.002, M=0.002, BL=0.7, FF=0.7):
+        """
+
+           :param fmod: frequency modulation
+           :param A: amplitude of modulation
+           :param M: delay time
+           :param BL: blend
+           :param FF: feed forward
+           :return: data with flanger added
+         """
 
         x = util.LinearWrap(self.data)
 
@@ -72,6 +90,13 @@ class Effects:
     # Modulated Echo (Vibrato)
     def vibrato(self,  maxDelaySamps=200, fmod=1):
 
+        """
+
+        :param maxDelaySamps: maximum delay samples
+        :param fmod: frequency modulation
+        :return: data with vibrato added
+        """
+
         x = util.LinearWrap(self.data)
 
         outputSamps = len(x) + maxDelaySamps
@@ -95,6 +120,16 @@ class Effects:
 
     # Simple Echo
     def echo(self, fmod=0, A=0, M=0.05, BL=0.7, FF=0.7):
+        """
+
+           :param fmod: frequency modulation
+           :param A: amplitude of modulation
+           :param M: delay time
+           :param BL: blend
+           :param FF: feed forward
+           :return: data with chorus added
+
+         """
 
         x = util.LinearWrap(self.data)
         M = int(M * self.sampling_rate)

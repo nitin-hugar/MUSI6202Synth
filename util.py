@@ -15,9 +15,6 @@ def parse_arguments():
     parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
     # Granular:
 
-    # # ADSR:
-    # envelope = subparsers.add_parser('ADSR', help='Add ADSR envelope')
-    # envelope.add_argument('--envelope', nargs=4, type=float,metavar='',required=True, help='Add ADSR Envelope')
 
     # Effects Group
     fx = subparsers.add_parser('effects', help='Add effects to the sound')
