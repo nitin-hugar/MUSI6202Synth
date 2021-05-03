@@ -13,6 +13,9 @@ def parse_arguments():
     parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
     parser.add_argument('-w', '--wavetype', type=str, metavar='', required=True, help='Type of wave')
     parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
+    parser.add_argument('--samplerate', type=int, metavar='', required=True, help='Output Sample Rate')
+    parser.add_argument('--bitrate', type=int, metavar='', required=True, help='Output Bit Rate')
+
     # Granular:
 
 
@@ -24,6 +27,7 @@ def parse_arguments():
     fx.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
     fx.add_argument('-e', '--echo', action='store_true', help='Add Echo')
     fx.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
+    fx.add_argument('--lowpass', action='store_true', help='Add Low-Pass Filter')
 
     return parser.parse_args()
 

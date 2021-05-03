@@ -3,7 +3,7 @@
 import numpy as np
 import math
 import soundfile as sf
-import utils
+import util
 
 class Effects:
     def __init__(self, data, sampling_rate):
@@ -22,7 +22,7 @@ class Effects:
         """
 
         # Simple Chorus
-        x = utils.LinearWrap(self.data)
+        x = util.LinearWrap(self.data)
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
 
@@ -32,7 +32,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
+        ringBuf = util.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -60,7 +60,7 @@ class Effects:
            :return: data with flanger added
          """
 
-        x = utils.LinearWrap(self.data)
+        x = util.LinearWrap(self.data)
 
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
@@ -71,7 +71,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
+        ringBuf = util.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -97,11 +97,11 @@ class Effects:
         :return: data with vibrato added
         """
 
-        x = utils.LinearWrap(self.data)
+        x = util.LinearWrap(self.data)
 
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
+        ringBuf = util.LinearRingBuffer(maxDelaySamps)
 
         deltaPhi = fmod / self.sampling_rate
         phi = 0
@@ -144,7 +144,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
+        ringBuf = util.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
