@@ -4,7 +4,7 @@ from generators import Generators
 import effects
 import pyloudnorm as pyln
 import matplotlib.pyplot as plt
-from util import *
+from utils import *
 import soundfile as sf
 
 SAMPLING_RATE = 48000
@@ -120,6 +120,6 @@ if __name__ == '__main__':
                 raise ValueError("Enter 'y' or 'n'")
 
 
-    sf.write('../output/output.wav', fx.data, SAMPLING_RATE)
+    sf.write('output/output.wav', fx.data, SAMPLING_RATE)
 
     print("Done!!")
