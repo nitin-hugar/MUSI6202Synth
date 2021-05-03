@@ -29,6 +29,12 @@ def parse_arguments():
 
     filt.add_argument('-lp', '--lowpass', action='store_true', help='Add lowpass filter')
     filt.add_argument('-hp', '--hipass', action='store_true', help='Add hipass filter')
+    filt.add_argument('-bp', '--bandpass', action='store_true', help='Add hipass filter')
+    filt.add_argument('-ap', '--allpass', action='store_true', help='Add hipass filter')
+    filt.add_argument('-pk', '--peak', action='store_true', help='Add hipass filter')
+    filt.add_argument('-nt', '--notch', action='store_true', help='Add hipass filter')
+    filt.add_argument('-hs', '--highshelf', action='store_true', help='Add hipass filter')
+    filt.add_argument('-ls', '--lowshelf', action='store_true', help='Add hipass filter')
 
     return parser.parse_args()
 

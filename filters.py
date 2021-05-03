@@ -9,7 +9,7 @@ class Filters:
         self.data = data
         self.sampling_rate = sampling_rate
 
-    def biquad(self, type="lowpass", gain=1.0, center_frequency=100, Q=1.0):
+    def biquad(self, type="lowpass", gain=1.0, center_frequency=100, Q=0.8):
 
         x = utils.LinearWrap(self.data)
         output_length = len(x)+2
