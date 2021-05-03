@@ -21,9 +21,35 @@ if __name__ == '__main__':
 
     # Generate sound
     print("Generating sound....")
-    numOfHarmonics = 20
     synth = Generators(notes, SAMPLING_RATE)
-    sound = synth.make_sound(args.wavetype, args.envelope, numOfHarmonics)
+    partials = []
+    coefficients = []
+    for key, value in vars(args).items():
+        if key == 'partials' and value is True:
+            val = input("Enter values of partials? (y/n): ")
+            if val == 'y':
+                partials  = input("Enter a space-separated list of partials: ").split()
+                partials = list(map(float, partials))
+            elif val == 'n':
+                partials=[1,2,3,4]
+                print("Adding default partials: ",partials)
+                
+        elif key == 'coefficients' and value is True:
+            val = input("Enter values of coefficients? (y/n): ")
+            if val == 'y':
+                coefficients  = input("Enter a space-separated list of partials: ").split()
+                
+                coefficients = list(map(float, coefficients))
+            elif val == 'n':
+                coefficients= [1] * len(partials)
+                print("Adding default coefficients: ",coefficients)
+    print(partials, coefficients)
+    if (len(partials) == len(coefficients)):
+        
+        sound = synth.make_sound(args.envelope, partials, coefficients)
+    else:
+        raise ValueError("Number of partials not equal to number of coefficeints")
+
 
     # set loudness to -12 LUFS
     print("Setting loudness to -12 LUFS....")
@@ -32,7 +58,7 @@ if __name__ == '__main__':
     sound = pyln.normalize.loudness(sound, loudness, -24.0)
 
     fx = effects.Effects(sound, SAMPLING_RATE)
-
+    print("Processing effects....")
     for key, value in vars(args).items():
         if key == 'chorus' and value is True:
             val = input("Enter Chorus parameter values? (y/n): ")

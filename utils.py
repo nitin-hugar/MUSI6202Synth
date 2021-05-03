@@ -13,6 +13,8 @@ def parse_arguments():
     parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
     parser.add_argument('-w', '--wavetype', type=str, metavar='', required=True, help='Type of wave')
     parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
+    parser.add_argument('--partials',action='store_true', required=True, help='Add partials')
+    parser.add_argument('--coefficients',action='store_true', required=True, help='Add coefficients (partial amplitudes)')
     # Granular:
 
 
