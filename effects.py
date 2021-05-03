@@ -11,9 +11,57 @@ class Effects:
         self.sampling_rate = sampling_rate
 
     def chorus(self, fmod=1.5, A=0.002, M=0.002, BL=1.0, FF=0.7):
+        """
+
+        :param fmod: frequency modulation
+        :param A: amplitude of modulation
+        :param M: delay time
+        :param BL: blend
+        :param FF: feed forward
+        :return: data with chorus added
+        """
 
         # Simple Chorus
+        x = util.LinearWrap(self.data)
+        A = int(A * self.sampling_rate)
+        M = int(M * self.sampling_rate)
+
+        if A > M:
+            raise RuntimeError("Amplitude of vibrato too high for delay length")
+
+        maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
+        outputSamps = len(x) + maxDelaySamps
+        y = np.zeros(outputSamps)
+        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        deltaPhi = fmod / self.sampling_rate
+        phi = 0
+
+        for i in range(outputSamps):
+            s = x[i]
+            ringBuf.pushSample(s)
+            delaySamps = M + int(math.sin(2 * math.pi * phi) * A)
+            y[i] = s * BL + ringBuf.delayedSample(delaySamps) * FF
+
+            phi = phi + deltaPhi
+            while phi >= 1:
+                phi -= 1
+
+        self.data = y
+
+    # Simple Flanger
+    def flanger(self, fmod=0.2, A=0.002, M=0.002, BL=0.7, FF=0.7):
+        """
+
+           :param fmod: frequency modulation
+           :param A: amplitude of modulation
+           :param M: delay time
+           :param BL: blend
+           :param FF: feed forward
+           :return: data with flanger added
+         """
+
         x = utils.LinearWrap(self.data)
+
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
 
@@ -39,50 +87,22 @@ class Effects:
 
         self.data = y
 
-    # Simple Flanger
-    def flanger(self):
-
-        x = utils.LinearWrap(self.data)
-
-        fmod = 0.2
-        A = int(0.002 * self.sampling_rate)
-        M = int(0.002 * self.sampling_rate)
-        BL = 0.7
-        FF = 0.7
-
-        if A > M:
-            raise RuntimeError("Amplitude of vibrato too high for delay length")
-
-        maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
-        outputSamps = len(x) + maxDelaySamps
-        y = np.zeros(outputSamps)
-        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
-        deltaPhi = fmod / self.sampling_rate
-        phi = 0
-
-        for i in range(outputSamps):
-            s = x[i]
-            ringBuf.pushSample(s)
-            delaySamps = M + int(math.sin(2 * math.pi * phi) * A)
-            y[i] = s * BL + ringBuf.delayedSample(delaySamps) * FF
-
-            phi = phi + deltaPhi
-            while phi >= 1:
-                phi -= 1
-
-        self.data = y
-
     # Modulated Echo (Vibrato)
-    def vibrato(self):
+    def vibrato(self,  maxDelaySamps=200, fmod=1):
+
+        """
+
+        :param maxDelaySamps: maximum delay samples
+        :param fmod: frequency modulation
+        :return: data with vibrato added
+        """
 
         x = utils.LinearWrap(self.data)
 
-        maxDelaySamps = 200
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
         ringBuf = utils.LinearRingBuffer(maxDelaySamps)
 
-        fmod = 1
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -99,17 +119,18 @@ class Effects:
         self.data = y
 
     # Simple Echo
-    def echo(self):
+    def echo(self, fmod=0, A=0, M=0.05, BL=0.7, FF=0.7):
+        """
+           :param fmod: frequency modulation
+           :param A: amplitude of modulation
+           :param M: delay time
+           :param BL: blend
+           :param FF: feed forward
+           :return: data with chorus added
+         """
 
         x = utils.LinearWrap(self.data)
-
-        output = '../output/sv_simpleEcho2.wav'
-
-        fmod = 0
-        A = 0
-        M = int(0.05 * self.sampling_rate)
-        BL = 0.7
-        FF = 0.7
+        M = int(M * self.sampling_rate)
 
         if A > M:
             raise RuntimeError("Amplitude of vibrato too high for delay length")

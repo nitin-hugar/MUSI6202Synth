@@ -1,0 +1,6 @@
+soundfile
+numpy
+scipy
+pyloudnorm
+music21
+wavio
