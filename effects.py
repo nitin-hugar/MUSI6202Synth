@@ -3,54 +3,7 @@
 import numpy as np
 import math
 import soundfile as sf
-
-
-class RingBuffer(object):
-    def __init__(self, maxDelay):
-        self.maxDelay = maxDelay + 1
-        self.buf = np.zeros(self.maxDelay)
-        self.writeInd = 0
-
-    def pushSample(self, s):
-        self.buf[self.writeInd] = s
-        self.writeInd = (self.writeInd + 1) % len(self.buf)
-
-    def delayedSample(self, d):
-        d = min(self.maxDelay - 1, max(0, d))
-        i = ((self.writeInd + self.maxDelay) - d) % self.maxDelay
-        return self.buf[i]
-
-
-# Linear Interpolation
-class LinearWrap(object):
-    def __init__(self, it):
-        self.it = it
-
-    def __len__(self):
-        return len(self.it)
-
-    def __setitem__(self, inI, val):
-        if type(inI) != int:
-            raise RuntimeError('Can only write to integer values')
-        self.it[inI] = val
-
-    def __getitem__(self, inI):
-        loI = math.floor(inI)
-        hiI = math.ceil(inI)
-        a = inI - loI
-        inRange = lambda val: val >= 0 and val < len(self.it)
-        loX = self.it[loI] if inRange(loI) else 0
-        hiX = self.it[hiI] if inRange(hiI) else 0
-        return loX * (1 - a) + hiX * a
-
-
-# Wrap inner iterable inside RingBuffer with float indexable array
-class LinearRingBuffer(RingBuffer):
-    def __init__(self, maxDelay):
-        self.maxDelay = maxDelay + 1
-        self.buf = LinearWrap(np.zeros(self.maxDelay))
-        self.writeInd = 0
-
+import util
 
 class Effects:
     def __init__(self, data, sampling_rate):
@@ -60,7 +13,7 @@ class Effects:
     def chorus(self, fmod=1.5, A=0.002, M=0.002, BL=1.0, FF=0.7):
 
         # Simple Chorus
-        x = LinearWrap(self.data)
+        x = util.LinearWrap(self.data)
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
 
@@ -70,7 +23,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = LinearRingBuffer(maxDelaySamps)
+        ringBuf = util.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -89,7 +42,7 @@ class Effects:
     # Simple Flanger
     def flanger(self):
 
-        x = LinearWrap(self.data)
+        x = util.LinearWrap(self.data)
 
         fmod = 0.2
         A = int(0.002 * self.sampling_rate)
@@ -103,7 +56,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = LinearRingBuffer(maxDelaySamps)
+        ringBuf = util.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -122,12 +75,12 @@ class Effects:
     # Modulated Echo (Vibrato)
     def vibrato(self):
 
-        x = LinearWrap(self.data)
+        x = util.LinearWrap(self.data)
 
         maxDelaySamps = 200
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = LinearRingBuffer(maxDelaySamps)
+        ringBuf = util.LinearRingBuffer(maxDelaySamps)
 
         fmod = 1
         deltaPhi = fmod / self.sampling_rate
@@ -148,7 +101,7 @@ class Effects:
     # Simple Echo
     def echo(self):
 
-        x = LinearWrap(self.data)
+        x = util.LinearWrap(self.data)
 
         output = '../output/sv_simpleEcho2.wav'
 
@@ -164,7 +117,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = LinearRingBuffer(maxDelaySamps)
+        ringBuf = util.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
