@@ -6,9 +6,10 @@ import pyloudnorm as pyln
 import matplotlib.pyplot as plt
 from utils import *
 import soundfile as sf
+from postprocessing import *
+from math import ceil
 
 SAMPLING_RATE = 48000
-
 
 if __name__ == '__main__':
     args = parse_arguments()
@@ -145,6 +146,26 @@ if __name__ == '__main__':
             else:
                 raise ValueError("Enter 'y' or 'n'")
 
+    # Down sampling and Down quantization
+    sound = np.asarray(fx.data, dtype=np.int32)
+    sound = sound.astype(np.int32)
+    # write(wave_file_path, fs, data)
+
+    output = Downsampler()
+    res = sound
+
+    if args.samplerate is not None:
+        output.output_fs = int(args.samplerate)
+
+        down_factor = ceil(SAMPLING_RATE / float(output.output_fs))
+        print(down_factor)
+        t = len(sound) / SAMPLING_RATE
+        down_sampled_data = output.down_sample(sound, down_factor, output.output_fs, SAMPLING_RATE)
+        res = output.up_sample(down_sampled_data, int(SAMPLING_RATE / down_factor), output.output_fs, t)
+
+    if args.bitrate is not None:
+        output.output_br = int(args.bitrate)
+        dq1 = output.down_quantization(res, 32, output.output_br)
 
     sf.write('output/output.wav', fx.data, SAMPLING_RATE)
 

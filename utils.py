@@ -15,6 +15,9 @@ def parse_arguments():
     parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
     parser.add_argument('--partials',action='store_true', required=True, help='Add partials')
     parser.add_argument('--coefficients',action='store_true', required=True, help='Add coefficients (partial amplitudes)')
+    parser.add_argument('--samplerate', type=int, metavar='', required=True, help='Output Sample Rate')
+    parser.add_argument('--bitrate', type=int, metavar='', required=True, help='Output Bit Rate')
+
     # Granular:
 
 
@@ -26,6 +29,7 @@ def parse_arguments():
     fx.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
     fx.add_argument('-e', '--echo', action='store_true', help='Add Echo')
     fx.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
+    fx.add_argument('--lowpass', action='store_true', help='Add Low-Pass Filter')
 
     return parser.parse_args()
 
