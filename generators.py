@@ -11,7 +11,7 @@ class Generators:
         self.numOfNotes = len(notes.frequencies)
 
 
-    def make_sound(self, envelope, partials, coefficients):
+    def additive(self, envelope, partials, coefficients):
         sound = []
         for i in np.arange(self.numOfNotes):
             omega = 2 * np.pi * self.frequencies[i]

@@ -22,7 +22,7 @@ class Effects:
         """
 
         # Simple Chorus
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
 
@@ -32,7 +32,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 

@@ -15,7 +15,6 @@ def parse_arguments():
     parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
     parser.add_argument('--samplerate', type=int, metavar='', required=True, help='Output Sample Rate')
     parser.add_argument('--bitrate', type=int, metavar='', required=True, help='Output Bit Rate')
-
     # Granular:
 
 

@@ -1,7 +1,7 @@
 # Functions are all filters
 import numpy as np
 import math
-import util
+import utils
 
 
 class Filters:
@@ -12,12 +12,12 @@ class Filters:
 
     def biquad(self, type="lowpass", resonance=0.2, cutoff_frequency=1000):
 
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
 
         maxDelaySamps = 2  # Only need last two samples for second order biquad
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
 
         if type == "lowpass":
             c = 1.0 / math.tan(math.pi * cutoff_frequency / self.sampling_rate)
