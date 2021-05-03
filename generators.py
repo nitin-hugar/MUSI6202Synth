@@ -11,7 +11,7 @@ class Generators:
         self.numOfNotes = len(notes.frequencies)
 
 
-    def make_sound(self, signalType, numOfHarmonics):
+    def make_sound(self, signalType, envelope, numOfHarmonics):
         sound = []
         for i in np.arange(self.numOfNotes):
             omega = 2 * np.pi * self.frequencies[i]
@@ -19,7 +19,7 @@ class Generators:
 
             if signalType == 'sine':
                 x = self.amplitude * np.sin(omega * t)
-                env = ADSR.getadsr(x)
+                env = ADSR.getadsr(x, envelope)
                 x_env = x * env[:len(x)]
                 sound.extend(x_env)
 
@@ -28,7 +28,7 @@ class Generators:
                 for k in np.arange(1, numOfHarmonics, 2):
                     square += (1/k) * np.sin(k * omega * t)
                     x = self.amplitude * (4/np.pi)*square
-                    env = ADSR.getadsr(x)
+                    env = ADSR.getadsr(x, envelope)
                     x_env = x * env[:len(x)]
                 sound.extend(x_env)
 
@@ -37,7 +37,7 @@ class Generators:
                 for k in range(1,numOfHarmonics):
                     saw += (np.power(-1, k)) * (np.sin(omega * k * t)) / k
                     x = (2 * self.amplitude / np.pi) * saw
-                    env = ADSR.getadsr(x)
+                    env = ADSR.getadsr(x, envelope)
                     x_env = x * env[:len(x)]
                 sound.extend(x_env)
 

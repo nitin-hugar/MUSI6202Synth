@@ -1,10 +1,9 @@
 import numpy as np
 
-
 sampling_rate = 48000
 
 
-def adsr(sound, a, d, s, r):
+def adsr(sound, envelope):
     """
   Linear ADSR envelope.
   Parameters
@@ -18,8 +17,9 @@ def adsr(sound, a, d, s, r):
   Returns
   -------
     ADSR Envelop
-
   """
+    a, d, s, r = envelope[:]
+
     attack = a * sampling_rate
     decay = d * sampling_rate
     sustain = s
@@ -44,9 +44,9 @@ def adsr(sound, a, d, s, r):
         yield sustain + sample * m_r
 
 
-def getadsr(sound, a=.2, d=.1, s=.7, r=.3):
+def getadsr(sound, envelope):
     env = []
-    for value in adsr(sound, a, d, s, r):
+    for value in adsr(sound, envelope):
         env.append(value)
     env = np.array(env)
     return env
