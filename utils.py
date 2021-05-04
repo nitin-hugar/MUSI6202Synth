@@ -4,12 +4,14 @@ import math
 from music21 import *
 
 
-def parse_additive_arguments():
+def parse_arguments():
+    """
+    Parse all command line arguments for both synths: additive and granular
+    """
     synth_parser = argparse.ArgumentParser(description="Synth type parser")
     synth_subparser = synth_parser.add_subparsers(help='commands')
 
     synth_parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
-    synth_parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
     synth_parser.add_argument('--samplerate', type=int, metavar='', required=False, help='Output Sample Rate')
     synth_parser.add_argument('--bitrate', type=int, metavar='', required=False, help='Output Bit Rate')
 
@@ -23,23 +25,10 @@ def parse_additive_arguments():
 
     return synth_parser.parse_args()
 
-def parse_granular_arguments():
-    parser = argparse.ArgumentParser(description="DSP Granular Synth Implementation")
-    subparsers = parser.add_subparsers(help='commands')
-
-    parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of wav file')
-
-    fx = subparsers.add_parser('inserts', help='Add effects to the sound')
-    fx.add_argument('-c', '--chorus',action='store_true', help='Add Chorus')
-    fx.add_argument('-f', '--flanger', action='store_true', help='Add Flanger')
-    fx.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
-    fx.add_argument('-e', '--echo', action='store_true', help='Add Echo')
-    fx.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
-    fx.add_argument('--filter', action='store_true', help='Add Low-Pass Filter')
-
-    return parser.parse_args()
-
 class Notes:
+    """
+    Parses MIDI file from input path and generates notenumbers, durations and frequencies
+    """
     def __init__(self, inputPath):
         self.inputPath = inputPath
         self.notenumbers, self.durations, self.frequencies = self.parseMidi()
@@ -63,6 +52,9 @@ class Notes:
         return notenumbers, durations, frequencies
 
 class RingBuffer(object):
+    """
+    Utils class for a Ring Buffer implementation
+    """
     def __init__(self, maxDelay):
         self.maxDelay = maxDelay + 1
         self.buf = np.zeros(self.maxDelay)
@@ -78,8 +70,10 @@ class RingBuffer(object):
         return self.buf[i]
 
 
-# Linear Interpolation
 class LinearWrap(object):
+    """
+    Utils class for Linear Interpolation implementation
+    """
     def __init__(self, it):
         self.it = it
 

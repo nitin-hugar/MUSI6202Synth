@@ -5,7 +5,10 @@ import utils
 
 
 class Filters:
-
+    """
+    Class that handles all the different types of filters
+    with a common biquad filter
+    """
     def __init__(self, data, sampling_rate):
         self.data = data
         self.sampling_rate = sampling_rate
