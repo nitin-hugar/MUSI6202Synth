@@ -20,10 +20,21 @@ class Generators:
             t = np.arange(0, float(self.durations[i]), float(1 / self.fs))
             signal = 0
             for k in range(0, len(partials)):
-                signal += (1/partials[k]) * np.sin(k * omega * t)
-                x = coefficients[k] * (4/np.pi)* signal
-                env = ADSR.getadsr(x, envelope)
-                x_env = x * env[:len(x)]
+                partial = (1/partials[k]) * np.sin(k * omega * t)
+                signal += coefficients[k] * (4/np.pi)* partial
+
+            env = ADSR.getadsr(signal, envelope)
+            # rel_length = 100
+            # sig_length = len(signal) - rel_length
+            # if(len(signal) < len(env)):
+            #     release = np.linspace(signal[-rel_length], 0, num=rel_length) ** 2
+            #     print(release)
+            #     x_env = signal[:sig_length] * env[:sig_length]
+            #     np.hstack((x_env, release))
+            #     x_env = list(x_env)
+            # else:
+            x_env = signal * env
+
             sound.extend(x_env)
 
         return np.array(sound)
