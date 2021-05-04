@@ -4,22 +4,36 @@ import math
 from music21 import *
 
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="DSP Synth Implementation")
+def parse_additive_arguments():
+    synth_parser = argparse.ArgumentParser(description="Synth type parser")
+    synth_subparser = synth_parser.add_subparsers(help='commands')
+
+    synth_parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
+    synth_parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
+    synth_parser.add_argument('--samplerate', type=int, metavar='', required=False, help='Output Sample Rate')
+    synth_parser.add_argument('--bitrate', type=int, metavar='', required=False, help='Output Bit Rate')
+
+    inserts = synth_subparser.add_parser('inserts', help='Add effects to the sound')
+    inserts.add_argument('-c', '--chorus',action='store_true', help='Add Chorus')
+    inserts.add_argument('-f', '--flanger', action='store_true', help='Add Flanger')
+    inserts.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
+    inserts.add_argument('-e', '--echo', action='store_true', help='Add Echo')
+    inserts.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
+    inserts.add_argument('--filter', action='store_true', help='Add Filter')
+
+    return synth_parser.parse_args()
+
+def parse_granular_arguments():
+    parser = argparse.ArgumentParser(description="DSP Granular Synth Implementation")
 
     subparsers = parser.add_subparsers(help='commands')
 
-    # Additive:
-    parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
-    parser.add_argument('-w', '--wavetype', type=str, metavar='', required=True, help='Type of wave')
-    parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
-    parser.add_argument('--partials',action='store_true', required=True, help='Add partials')
-    parser.add_argument('--coefficients',action='store_true', required=True, help='Add coefficients (partial amplitudes)')
+    parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of wav file')
+    parser.add_argument('-s', '--sample', type=str, metavar='', required=True, help='Input path of audio sample file')
+    # parser.add_argument('-w', '--wavetype', type=str, metavar='', required=True, help='Type of wave')
+    # parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
     parser.add_argument('--samplerate', type=int, metavar='', required=True, help='Output Sample Rate')
     parser.add_argument('--bitrate', type=int, metavar='', required=True, help='Output Bit Rate')
-
-    # Granular:
-
 
     # Effects Group
     fx = subparsers.add_parser('effects', help='Add effects to the sound')
@@ -33,29 +47,28 @@ def parse_arguments():
 
     return parser.parse_args()
 
-
 class Notes:
     def __init__(self, inputPath):
         self.inputPath = inputPath
-        self.notenames, self.durations, self.frequencies = self.parseMidi()
+        self.notenumbers, self.durations, self.frequencies = self.parseMidi()
 
     def parseMidi(self):
         midiData = converter.parse(self.inputPath)
         notes = midiData.flat.notesAndRests
-        notenames = []
+        notenumbers = []
         durations = []
         frequencies = []
         for i in notes:
             if i.isNote:
-                notenames.append(i.pitch.nameWithOctave)
+                notenumbers.append(i.pitch.midi)
                 durations.append(i.quarterLength)
                 frequencies.append(i.pitch.frequency)
             else:
-                notenames.append(0)
+                notenumbers.append(0)
                 durations.append(i.quarterLength)
                 frequencies.append(0)
 
-        return notenames, durations, frequencies
+        return notenumbers, durations, frequencies
 
 class RingBuffer(object):
     def __init__(self, maxDelay):

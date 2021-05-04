@@ -2,70 +2,71 @@
 
 from scipy import signal
 import numpy as np
-import soundfile as sf
 from scipy.interpolate import interp1d
 import wavio
-
-"""
-To Do: 
-1. Make plots for all the outputs. 
-2. Down Quantization function
-"""
+from dataclasses import dataclass
 
 
+@dataclass
 class Downsampler:
-    def __init__(self):
-        self.output_fs = int(48000)
-        self.output_br = int(32)
+    output_fs: int = 48000
+    output_br: int = 32
 
-    def write_wav(self, wave_file_path, data, fs=int(48000), bitrate=int(32)):
-        print("writing data:", data, "sampling-rate:", fs, "at bit-rate:", bitrate, " to ", wave_file_path)
+    def write_wav(self, wave_file_path, data, fs=output_fs, bitrate=output_br):
+
         if bitrate == 8:
-            sampwidth = 1
+            sample_width = 1
         elif bitrate == 16:
-            sampwidth = 2
+            sample_width = 2
         elif bitrate == 24:
-            sampwidth = 3
+            sample_width = 3
         else:
-            sampwidth = 4
-        wavio.write(wave_file_path, data, fs, sampwidth=sampwidth)
+            sample_width = 4
 
-    def low_pass(self, data, target_fs, source_fs):
-        b, a = signal.butter(N=2, Wn=target_fs / 2, btype='low', analog=False, fs=source_fs)
+        wavio.write(wave_file_path, data, fs, sampwidth=sample_width)
+
+    # low_pass: Remove frequencies above the Shannon-Nyquist frequency
+    def low_pass(self, data, Fs_new, Fs):
+        b, a = signal.butter(N=2, Wn=Fs_new / 2, btype='low', analog=False, fs=Fs)
         filtered = signal.filtfilt(b, a, data)
-        return filtered
+        return filtered.astype(np.int32)
 
+    # downsample: return the down-sampled
     def down_sample(self, data, factor, target_fs, source_fs):
-        filtered_data = self.low_pass(data, target_fs, source_fs)
-        return filtered_data[::factor]
+        low_filtered = self.low_pass(data, target_fs, source_fs)
+        return low_filtered[::factor]
 
+    # cubic_interpolate: return upsampled array with cubic interpolated values
     def cubic_interpolate(self, data, t, num_samples):
         x = np.linspace(0, t, num=len(data), endpoint=True)
         y = data
-        interpolate = interp1d(x, y, kind='cubic')
-        x2 = np.linspace(0, t, num=num_samples, endpoint=True)
-        return interpolate(x2)
+        cs = interp1d(x, y, kind='cubic')
+        xNew = np.linspace(0, t, num=num_samples, endpoint=True)
+        out = cs(xNew).astype(np.int32)
+        return out
 
+    # upsample: function to upsample original data to a new sampling rate
     def up_sample(self, data, source_fs, target_fs, t):
         new_samples = int(int(len(data) / source_fs) * int(target_fs))
         return self.cubic_interpolate(data, t, new_samples)
 
-    def add_triangular_dither(self, data, old_br, new_br):
-        diff = old_br - new_br
+    def add_triangular_dither(self, original, original_br, new_br):
+        diff = original_br - new_br
         left = (-1) * (2 ** diff)
         mode = 0
         right = (2 ** diff) - 1
-        size = data.shape
+        size = original.shape
         noise = np.random.triangular(left, mode, right, size)
         noise = noise.astype(np.int32)
 
-        return data + noise
+        return original + noise
 
-    def down_quantization(self, data, old_br, new_br):
-        dithered = self.add_triangular_dither(data, old_br, new_br)
+    def down_quantization(self, data, original_br, new_br):
+
+        dithered = self.add_triangular_dither(data, original_br, new_br)
         dithered = dithered.astype(np.int32)
         down_quantized = np.zeros(len(dithered), dtype=np.int32)
 
         for i in range(len(dithered)):
-            down_quantized[i] = dithered[i] >> (old_br - new_br)
+            down_quantized[i] = dithered[i] >> (original_br - new_br)
         return down_quantized

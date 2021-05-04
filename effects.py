@@ -4,6 +4,8 @@ import numpy as np
 import math
 import soundfile as sf
 import utils
+from filters import *
+
 
 class Effects:
     def __init__(self, data, sampling_rate):
@@ -22,17 +24,17 @@ class Effects:
         """
 
         # Simple Chorus
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
 
         if A > M:
             raise RuntimeError("Amplitude of vibrato too high for delay length")
 
-        maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
+        maxDelaySamps = M + A + 2
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -68,7 +70,7 @@ class Effects:
         if A > M:
             raise RuntimeError("Amplitude of vibrato too high for delay length")
 
-        maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
+        maxDelaySamps = M + A + 2
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
         ringBuf = utils.LinearRingBuffer(maxDelaySamps)
@@ -154,7 +156,7 @@ class Effects:
 
         self.data = y
 
-    def conv_reverb(self, impulse_path, amount_verb=0.2):
+    def conv_reverb(self, impulse_path, amount_verb=0.4):
 
         impulse = sf.read(impulse_path, self.sampling_rate)[0]
         impulse = impulse[:, 0]
@@ -175,3 +177,8 @@ class Effects:
             wet_signal = np.pad(wet_signal, (0, pad_length), 'constant')
 
         self.data = dry_signal + wet_signal + x_zp
+
+    def filters(self, type="lowpass", gain=1.0, center_frequency=100, Q=0.8):
+        filter = Filters(self.data, self.sampling_rate)
+        self.data = filter.biquad(type, gain, center_frequency, Q)
+
