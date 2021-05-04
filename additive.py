@@ -21,10 +21,26 @@ if __name__ == '__main__':
     path = args.input
     notes = Notes(path)
 
-    # Generate sound
+    # Generate sound with Additive synth
     print("Generating sound....")
     synth = Generators(notes, SAMPLING_RATE)
 
+    val = input("Enter values of partials? (y/n): ")
+    if val == 'y':
+        partials  = input("Enter a space-separated list of partials: ").split()
+        partials = list(map(float, partials))
+    elif val == 'n':
+        partials=[1,2,3,4]
+        print("Adding default partials: ",partials)
+
+    val = input("Enter values of coefficients? (y/n): ")            
+    if val == 'y':
+        coefficients  = input("Enter a space-separated list of coefficients: ").split()        
+        coefficients = list(map(float, coefficients))
+    elif val == 'n':
+        coefficients= [1] * len(partials)
+        print("Adding default coefficients: ",coefficients)
+        
     partials = [1, 2, 3, 4]
     coefficients = [1] * len(partials)
 
