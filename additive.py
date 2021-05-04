@@ -40,7 +40,7 @@ if __name__ == '__main__':
     elif val == 'n':
         coefficients= [1] * len(partials)
         print("Adding default coefficients: ",coefficients)
-        
+
     partials = [1, 2, 3, 4]
     coefficients = [1] * len(partials)
 
@@ -157,8 +157,23 @@ if __name__ == '__main__':
             else:
                 raise ValueError("Enter 'y' or 'n'")
 
-# Normalize Audio:
 sound = inserts.data
+
+# Granularization
+val = input("Granularize output? (y/n): ")
+if val == 'y':
+    gs = int(input("Enter Grain Size: "))
+    hs = int(input("Enter Hop Size: "))
+    ts = float(input("Enter Time Scale: "))
+    fs = float(input("Enter Frequency Scale: "))
+    tv = float(input("Enter Time Variation: "))
+    fv = float(input("Enter Frequency Variation: "))
+    sound = synth.granular(sound, gs, hs, ts, fs, tv, fv)
+
+elif val == 'n':
+    print('Bypassing granular synth')
+
+# Normalize Audio:
 flag = max(sound) if max(sound) else 1
 x = np.divide(sound, flag)
 x = x * np.iinfo(np.int32).max
