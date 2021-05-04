@@ -25,30 +25,6 @@ class Generators:
                 env = ADSR.getadsr(x, envelope)
                 x_env = x * env[:len(x)]
             sound.extend(x_env)
-            
-            # if signalType == 'sine':
-            #     x = self.amplitude * np.sin(omega * t)
-            #     env = ADSR.getadsr(x, envelope)
-            #     x_env = x * env[:len(x)]
-            #     sound.extend(x_env)
-
-            # elif signalType == 'square':
-            #     square = 0
-            #     for k in np.arange(1, numOfHarmonics, 2):
-            #         square += (1/k) * np.sin(k * omega * t)
-            #         x = self.amplitude * (4/np.pi)*square
-            #         env = ADSR.getadsr(x, envelope)
-            #         x_env = x * env[:len(x)]
-            #     sound.extend(x_env)
-
-            # elif signalType == 'sawtooth':
-            #     saw = 0
-            #     for k in range(1,numOfHarmonics):
-            #         saw += (np.power(-1, k)) * (np.sin(omega * k * t)) / k
-            #         x = (2 * self.amplitude / np.pi) * saw
-            #         env = ADSR.getadsr(x, envelope)
-            #         x_env = x * env[:len(x)]
-            #     sound.extend(x_env)
 
         return np.array(sound)
 
@@ -94,7 +70,6 @@ class Generators:
             for grainOutputIdx in range(outputGrainSize):
                 grainInputIdx = grainOutputIdx * grainPitch
                 grainOutput[grainOutputIdx] = windowedGrain[grainInputIdx]
-            print(grainOutputPosition, output[grainOutputPosition:grainOutputPosition+outputGrainSize].shape, grainOutput.shape)
             output[grainOutputPosition:grainOutputPosition+outputGrainSize] += grainOutput
         
         return output

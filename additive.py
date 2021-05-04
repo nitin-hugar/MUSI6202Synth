@@ -6,9 +6,9 @@ import filters
 import pyloudnorm as pyln
 import matplotlib.pyplot as plt
 from utils import *
-import soundfile as sf
 from postprocessing import *
 from math import ceil
+import soundfile as sf
 
 SAMPLING_RATE = 48000
 
@@ -24,40 +24,18 @@ if __name__ == '__main__':
     # Generate sound
     print("Generating sound....")
     synth = Generators(notes, SAMPLING_RATE)
-    partials = []
-    coefficients = []
-    val = input("Enter values of partials? (y/n): ")
-    if val == 'y':
-        partials  = input("Enter a space-separated list of partials: ").split()
-        partials = list(map(float, partials))
-    elif val == 'n':
-        partials=[1,2,3,4]
-        print("Adding default partials: ",partials)
 
-    val = input("Enter values of coefficients? (y/n): ")            
-    if val == 'y':
-        coefficients  = input("Enter a space-separated list of coefficients: ").split()        
-        coefficients = list(map(float, coefficients))
-    elif val == 'n':
-        coefficients= [1] * len(partials)
-        print("Adding default coefficients: ",coefficients)
-    
-    if (len(partials) == len(coefficients)):    
+    partials = [1, 2, 3, 4]
+    coefficients = [1] * len(partials)
+
+    if len(partials) == len(coefficients):
         sound = synth.additive(args.envelope, partials, coefficients)
     else:
         raise ValueError("Number of partials not equal to number of coefficeints")
 
-
-    # set loudness to -12 LUFS
-    print("Setting loudness to -12 LUFS....")
-    meter = pyln.Meter(SAMPLING_RATE)
-    loudness = meter.integrated_loudness(sound)
-    sound = pyln.normalize.loudness(sound, loudness, -24.0)
-    
-    fx = effects.Effects(sound, SAMPLING_RATE)
-    filt = filters.Filters(sound, SAMPLING_RATE)
-
-    print("Processing effects....")
+    # Process Inserts Chain
+    inserts = effects.Effects(sound, SAMPLING_RATE)
+    print("Processing Inserts....")
     for key, value in vars(args).items():
         if key == 'chorus' and value is True:
             val = input("Enter Chorus parameter values? (y/n): ")
@@ -68,11 +46,11 @@ if __name__ == '__main__':
                 BL = float(input("BL: "))
                 FF = float(input("FF: "))
                 print("Adding Chorus...")
-                fx.chorus(fmod, A, M, BL, FF)
+                inserts.chorus(fmod, A, M, BL, FF)
                 print('Chorus added')
             elif val == 'n':
                 print("Adding Chorus...")
-                fx.chorus()
+                inserts.chorus()
                 print('Chorus added')
             else:
                 raise ValueError("Enter 'y' or 'n'")
@@ -86,11 +64,11 @@ if __name__ == '__main__':
                 BL = float(input("BL: "))
                 FF = float(input("FF: "))
                 print("Adding Flanger effect...")
-                fx.flanger(fmod, A, M, BL, FF)
+                inserts.flanger(fmod, A, M, BL, FF)
                 print("Flanger added")
             elif val == 'n':
                 print("Adding Flanger...")
-                fx.flanger()
+                inserts.flanger()
                 print("Flanger added")
             else:
                 raise ValueError("Enter 'y' or 'n'")
@@ -101,11 +79,11 @@ if __name__ == '__main__':
                 maxDelaySamps = int(input("Maximum Delay Samples: "))
                 fmod = float(input("fmod: "))
                 print("Adding Vibrato effect...")
-                fx.vibrato(maxDelaySamps, fmod)
+                inserts.vibrato(maxDelaySamps, fmod)
                 print("Vibrato added")
             elif val == 'n':
                 print("Adding Vibrato effect...")
-                fx.vibrato()
+                inserts.vibrato()
                 print("Vibrato added")
             else:
                 raise ValueError("Enter 'y' or 'n'")
@@ -117,11 +95,11 @@ if __name__ == '__main__':
                 impulse_path = input("Enter path to impulse wav: ")
                 mix = float(input("Enter mix level (0-1): "))
                 print("Adding Reverb...")
-                fx.conv_reverb(impulse_path, mix)
+                inserts.conv_reverb(impulse_path, mix)
                 print("Reverb added")
             elif val == 'n':
                 print("Adding Reverb...")
-                fx.conv_reverb('impulses/UChurch.wav')
+                inserts.conv_reverb('impulses/UChurch.wav')
                 print("Reverb added")
             else:
                 raise ValueError("Enter 'y' or 'n'")
@@ -135,148 +113,59 @@ if __name__ == '__main__':
                 BL = float(input("BL: "))
                 FF = float(input("FF: "))
                 print("Adding Echo...")
-                fx.chorus(fmod, A, M, BL, FF)
+                inserts.chorus(fmod, A, M, BL, FF)
                 print('Echo added')
             elif val == 'n':
                 print("Adding Echo...")
-                fx.chorus()
+                inserts.chorus()
                 print('Echo added')
             else:
                 raise ValueError("Enter 'y' or 'n'")
-        
-        elif key == 'lowpass' and value is True:
-            val = input("Enter lowpass filter parameters? (y/n): ")
+
+        elif key == 'filter' and value is True:
+            val = input("Enter Filter parameter values? (y/n): ")
             if val == 'y':
-                Q = float(input("Q: "))
-                center_freq = float(input("Center Frequency: "))
-                gain = float(input("Gain: "))
-                filt.biquad("lowpass", gain, center_freq, Q)
+                print("Types: lowpass, hipass, bandpass, allpass, notch, peak, hishelf, lowshelf")
+                type = input("Filter type: ")
+                gain = float(input("Gain(0-1): "))
+                center_frequency = float(input("Center Frequency: "))
+                Q = float(input("Q Factor(0-1): "))
+                print("Adding filter....")
+                inserts.filters(type, gain, center_frequency, Q)
+                print("Filtering added")
+
             elif val == 'n':
-                print("Adding Lowpass filter...")
-                filt.biquad(type="lowpass")
-                print('Lowpass filter added')
+                print("Adding Filter with default values...")
+                inserts.filters()
+                print('Filtering added')
             else:
                 raise ValueError("Enter 'y' or 'n'")
 
-        elif key == 'hipass' and value is True:
-            val = input("Enter hipass filter parameters? (y/n): ")
-            if val == 'y':
-                Q = float(input("Q: "))
-                center_freq = float(input("Center Frequency: "))
-                gain = float(input("Gain: "))
-                filt.biquad("hipass", gain, center_freq, Q)
-            elif val == 'n':
-                print("Adding Highpass filter...")
-                filt.biquad(type="hipass")
-                print('Hipass filter added')
-            else:
-                raise ValueError("Enter 'y' or 'n'")
+# Normalize Audio:
+sound = inserts.data
+flag = max(sound) if max(sound) else 1
+x = np.divide(sound, flag)
+x = x * np.iinfo(np.int32).max
+x = x.astype(np.int32)
 
-        elif key == 'allpass' and value is True:
-            val = input("Enter allpass filter parameters? (y/n): ")
-            if val == 'y':
-                Q = float(input("Q: "))
-                center_freq = float(input("Center Frequency: "))
-                gain = float(input("Gain: "))
-                filt.biquad("allpass", gain, center_freq, Q)
-            elif val == 'n':
-                print("Adding Allpass filter...")
-                filt.biquad(type="allpass")
-                print('Allpass filter added')
-            else:
-                raise ValueError("Enter 'y' or 'n'")
+data = np.asarray(x, dtype=np.int32)
+sampling = Downsampler()
+output = data
 
-        elif key == 'bandpass' and value is True:
-            val = input("Enter bandpass filter parameters? (y/n): ")
-            if val == 'y':
-                Q = float(input("Q: "))
-                center_freq = float(input("Center Frequency: "))
-                gain = float(input("Gain: "))
-                filt.biquad("bandpass", gain, center_freq, Q)
-            elif val == 'n':
-                print("Adding Bandpass filter...")
-                filt.biquad(type="bandpass")
-                print('Bandpass filter added')
-            else:
-                raise ValueError("Enter 'y' or 'n'")
+print("Setting Sampling Rate to %s...." % args.samplerate)
+if args.samplerate is not None:
+    sampling.output_fs = int(args.samplerate)
 
-        elif key == 'notch' and value is True:
-            val = input("Enter notch filter parameters? (y/n): ")
-            if val == 'y':
-                Q = float(input("Q: "))
-                center_freq = float(input("Center Frequency: "))
-                gain = float(input("Gain: "))
-                filt.biquad("notch", gain, center_freq, Q)
-            elif val == 'n':
-                print("Adding Notch filter...")
-                filt.biquad(type="notch")
-                print('Notch filter added')
-            else:
-                raise ValueError("Enter 'y' or 'n'")
+    down_factor = ceil(SAMPLING_RATE / float(sampling.output_fs))
+    t = len(output) / SAMPLING_RATE
+    down_sampled_data = sampling.down_sample(output, down_factor, sampling.output_fs, SAMPLING_RATE)
+    output = sampling.up_sample(down_sampled_data, int(SAMPLING_RATE / down_factor), sampling.output_fs, t)
 
-        elif key == 'peak' and value is True:
-            val = input("Enter peak filter parameters? (y/n): ")
-            if val == 'y':
-                Q = float(input("Q: "))
-                center_freq = float(input("Center Frequency: "))
-                gain = float(input("Gain: "))
-                filt.biquad("peak", gain, center_freq, Q)
-            elif val == 'n':
-                print("Adding Peak filter...")
-                filt.biquad(type="peak")
-                print('Peak filter added')
-            else:
-                raise ValueError("Enter 'y' or 'n'")
+print("Setting Bitrate to %s...." % args.bitrate)
+if args.bitrate is not None:
+    sampling.output_br = int(args.bitrate)
+    output = sampling.down_quantization(output, 32, sampling.output_br)
 
-        elif key == 'highshelf' and value is True:
-            val = input("Enter high shelf filter parameters? (y/n): ")
-            if val == 'y':
-                Q = float(input("Q: "))
-                center_freq = float(input("Center Frequency: "))
-                gain = float(input("Gain: "))
-                filt.biquad("highshelf", gain, center_freq, Q)
-            elif val == 'n':
-                print("Adding High shelf filter...")
-                filt.biquad(type="highshelf")
-                print('High shelf filter added')
-            else:
-                raise ValueError("Enter 'y' or 'n'")
-
-        elif key == 'lowshelf' and value is True:
-            val = input("Enter low shelf filter parameters? (y/n): ")
-            if val == 'y':
-                Q = float(input("Q: "))
-                center_freq = float(input("Center Frequency: "))
-                gain = float(input("Gain: "))
-                filt.biquad("lowshelf", gain, center_freq, Q)
-            elif val == 'n':
-                print("Adding Low shelf filter...")
-                filt.biquad(type="lowshelf")
-                print('Low shelf filter added')
-            else:
-                raise ValueError("Enter 'y' or 'n'")
-
-    output = Downsampler()
-    res = sound
-
-    # sampling and bit rate quantization causes bugs
-    # print(sound)
-    # if args.samplerate is not None:
-    #     output.output_fs = int(args.samplerate)
-
-    #     down_factor = ceil(SAMPLING_RATE / float(output.output_fs))
-    #     print(down_factor)
-    #     t = len(sound) / SAMPLING_RATE
-    #     down_sampled_data = output.down_sample(sound, down_factor, output.output_fs, SAMPLING_RATE)
-    #     res = output.up_sample(down_sampled_data, int(SAMPLING_RATE / down_factor), output.output_fs, t)
-    # print(res)
-    # if args.bitrate is not None:
-    #     output.output_br = int(args.bitrate)
-    #     dq1 = output.down_quantization(res, 32, output.output_br)
-    # print(dq1)
-        
-
-
-    sf.write('output/output.wav', res.data, SAMPLING_RATE)
-
-    print("Done!!")
+output_path = 'output/output1.wav'
+print("Writing output to %s" % output_path)
+sampling.write_wav(output_path, output, sampling.output_fs, sampling.output_br)
