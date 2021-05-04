@@ -28,13 +28,13 @@ class Generators:
                 partial = (1/partials[k]) * np.sin(k * omega * t)
                 signal += coefficients[k] * (4/np.pi)* partial
 
-            env = ADSR.getadsr(x, envelope)
-            x_env = x * env[:len(x)]
+            env = ADSR.getadsr(signal, envelope)
+            x_env = signal * env
             sound.extend(x_env)
 
         return np.array(sound)
 
-    def granular(self, s, grainSize, hopSize, timeScale, freqScale, timeVariation, pitchVariation):
+    def granular(self, s, grainSize=2048, hopSize=256, timeScale=1, freqScale=1, timeVariation=15, pitchVariation=0):
         """
         Function to generate a time stretched/pitch shifted sample
         Input: Generated audio from the Additive synth
@@ -70,7 +70,7 @@ class Generators:
         # reproduces the output with overlap add
         for grainNum in range(numGrains):
             grainOutput.fill(0)
-
+            # print(grainNum, numGrains)
             grainPosition = hopSize * grainNum
             grainOutputPosition = int(grainOutputPositions[grainNum])
             grainPitch = grainOutputPitches[grainNum]

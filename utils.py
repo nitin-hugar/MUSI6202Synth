@@ -12,7 +12,6 @@ def parse_arguments():
     synth_subparser = synth_parser.add_subparsers(help='commands')
 
     synth_parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
-    synth_parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
     synth_parser.add_argument('--samplerate', type=int, metavar='', required=False, help='Output Sample Rate')
     synth_parser.add_argument('--bitrate', type=int, metavar='', required=False, help='Output Bit Rate')
 

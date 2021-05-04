@@ -2,13 +2,9 @@
 
 from generators import Generators
 import inserts
-import filters
-import pyloudnorm as pyln
-import matplotlib.pyplot as plt
 from utils import *
 from postprocessing import *
 from math import ceil
-import soundfile as sf
 
 SAMPLING_RATE = 48000
 
@@ -16,10 +12,13 @@ if __name__ == '__main__':
     args = parse_arguments()
     print(args)
 
-    # Get the input midi file:
+    # Get the input midi file and ADSR
     print("Getting notes from Midi....")
     path = args.input
     notes = Notes(path)
+    envelope = input("Enter space-seperated list of ADSR envelope values (0-1): ").split()
+    adsr = list(map(float, envelope))
+    print(adsr)
 
     # Generate sound with Additive synth
     print("Generating sound with Additive Synth....")
@@ -44,7 +43,7 @@ if __name__ == '__main__':
     coefficients = [1] * len(partials)
 
     if len(partials) == len(coefficients):
-        sound = synth.additive(args.envelope, partials, coefficients)
+        sound = synth.additive(adsr, partials, coefficients)
     else:
         raise ValueError("Number of partials not equal to number of coefficeints")
 
@@ -54,14 +53,14 @@ if __name__ == '__main__':
     print("Processing Inserts....")
     for key, value in vars(args).items():
         if key == 'chorus' and value is True:
-            print('Chorus :')
+            print('Chorus: ')
             val = input("Enter custom values? (y/n): ")
             if val == 'y':
-                fmod = float(input("Frequency modulation: "))
-                A = float(input("Amplitude: "))
-                M = float(input("Number of samples (delay): "))
-                BL = float(input("Blend: "))
-                FF = float(input("Feedforward: "))
+                fmod = float(input("Frequency modulation (default:1.5): "))
+                A = float(input("Amplitude (default:0.002): "))
+                M = float(input("Number of delay samples (default:0.002): "))
+                BL = float(input("Blend (default:1.0):"))
+                FF = float(input("Feedforward (default:0.7):"))
                 print("Adding Chorus...")
                 inserts.chorus(fmod, A, M, BL, FF)
                 print('Chorus added')
@@ -76,11 +75,11 @@ if __name__ == '__main__':
             print('Flanger :')
             val = input("Enter custom values? (y/n): ")
             if val == 'y':
-                fmod = float(input("Frequency modulation: "))
-                A = float(input("Amplitude: "))
-                M = float(input("Number of samples (delay): "))
-                BL = float(input("Blend: "))
-                FF = float(input("Feedforward: "))
+                fmod = float(input("Frequency modulation (default:0.2):"))
+                A = float(input("Amplitude (default:0.002):"))
+                M = float(input("Number of delay samples (default:0.002):"))
+                BL = float(input("Blend (default:0.7):"))
+                FF = float(input("Feedforward (default:0.7):"))
                 print("Adding Flanger effect...")
                 inserts.flanger(fmod, A, M, BL, FF)
                 print("Flanger added")
@@ -95,8 +94,8 @@ if __name__ == '__main__':
             print('Vibrato :')
             val = input("Enter custom values? (y/n): ")
             if val == 'y':
-                maxDelaySamps = int(input("Maximum Delay Samples: "))
-                fmod = float(input("Frequency modulation: "))
+                maxDelaySamps = int(input("Maximum Delay Samples (default:200):"))
+                fmod = float(input("Frequency modulation (default:1.0):"))
                 print("Adding Vibrato effect with default values...")
                 inserts.vibrato(maxDelaySamps, fmod)
                 print("Vibrato added")
@@ -111,8 +110,8 @@ if __name__ == '__main__':
             print("Reverb: ")
             val = input("Enter path to impulse file? (y/n): ")
             if val == 'y':
-                impulse_path = input("Enter path to impulse wav: ")
-                mix = float(input("Enter mix level (0-1): "))
+                impulse_path = input("Enter path to impulse wav (default:UChurch.wav):")
+                mix = float(input("Enter mix level (default:0.4):"))
                 print("Adding Reverb...")
                 inserts.conv_reverb(impulse_path, mix)
                 print("Reverb added")
@@ -127,11 +126,11 @@ if __name__ == '__main__':
             print("Echo: ")
             val = input("Enter custom values? (y/n): ")
             if val == 'y':
-                fmod = float(input("Frequency modulation: "))
-                A = float(input("Amplitude: "))
-                M = float(input("Number of samples (delay): "))
-                BL = float(input("Blend: "))
-                FF = float(input("Feedforward: "))
+                fmod = float(input("Frequency modulation (default:0.0):"))
+                A = float(input("Amplitude (default:0.0):"))
+                M = float(input("Number of delay samples (default:0.05):"))
+                BL = float(input("Blend (default:0.7):"))
+                FF = float(input("Feedforward (default:0.7):"))
                 print("Adding Echo...")
                 inserts.chorus(fmod, A, M, BL, FF)
                 print('Echo added')
@@ -147,10 +146,10 @@ if __name__ == '__main__':
             val = input("Enter custom values? (y/n): ")
             if val == 'y':
                 print("Types: lowpass, hipass, bandpass, allpass, notch, peak, hishelf, lowshelf")
-                type = input("Filter type: ")
-                gain = float(input("Gain (0-1): "))
-                center_frequency = float(input("Center Frequency: "))
-                Q = float(input("Q Factor (0-1): "))
+                type = input("Filter type (default:lowpass):")
+                gain = float(input("Gain (default:1.0):"))
+                center_frequency = float(input("Center Frequency (default:100):"))
+                Q = float(input("Q Factor (default:0.8):"))
                 print("Adding filter....")
                 inserts.filters(type, gain, center_frequency, Q)
                 print("Filtering added")
@@ -166,13 +165,17 @@ if __name__ == '__main__':
     # Granularization
     val = input("Granularize output? (y/n): ")
     if val == 'y':
-        gs = int(input("Enter Grain Size: "))
-        hs = int(input("Enter Hop Size: "))
-        ts = float(input("Enter Time Scale: "))
-        fs = float(input("Enter Frequency Scale: "))
-        tv = float(input("Enter Time Variation: "))
-        fv = float(input("Enter Frequency Variation: "))
-        sound = synth.granular(sound, gs, hs, ts, fs, tv, fv)
+        custom_val = input("Enter custom values? (y/n): ")
+        if custom_val == 'y':
+            gs = int(input("Enter Grain Size (default:2048):"))
+            hs = int(input("Enter Hop Size (default:128):"))
+            ts = float(input("Enter Time Scale (default:1):"))
+            fs = float(input("Enter Frequency Scale (default:1):"))
+            tv = float(input("Enter Time Variation (default:15):"))
+            fv = float(input("Enter Frequency Variation (default:0.0):"))
+            sound = synth.granular(sound, gs, hs, ts, fs, tv, fv)
+        elif custom_val == 'n':
+            sound = synth.granular(sound)
     elif val == 'n':
         print('Bypassing granular synth')
 
