@@ -10,40 +10,94 @@ class Filters:
         self.data = data
         self.sampling_rate = sampling_rate
 
-    def biquad(self, type="lowpass", resonance=0.2, cutoff_frequency=1000):
+    def biquad(self, type, gain, center_frequency, Q):
 
         x = utils.LinearWrap(self.data)
+        output_length = len(x)+2
+        y = np.zeros(output_length)
 
-        maxDelaySamps = 2  # Only need last two samples for second order biquad
-        outputSamps = len(x) + maxDelaySamps
-        y = np.zeros(outputSamps)
-        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
+        m_fxn1 = 0.0
+        m_fxn2 = 0.0
+        m_fyn1 = 0.0
+        m_fyn2 = 0.0
+
+        A = math.pow(10.0, gain / 40.0)
+        w0 = 2 * math.pi * (center_frequency / self.sampling_rate)
+        alpha = math.sin(w0) / (2 * Q)
 
         if type == "lowpass":
-            c = 1.0 / math.tan(math.pi * cutoff_frequency / self.sampling_rate)
-
-            a1 = 1.0 / (1.0 + resonance * c + c * c)
-            a2 = 2 * a1
-            a3 = a1
-            b1 = 2.0 * (1.0 - c * c) * a1
-            b2 = (1.0 - resonance * c + c * c) * a1
+            m_fb0 = (1 - math.cos(w0)) / 2
+            m_fb1 = 1 - math.cos(w0)
+            m_fb2 = (1 - math.cos(w0)) / 2
+            m_fa0 = 1 + alpha
+            m_fa1 = -2 * math.cos(w0)
+            m_fa2 = 1 - alpha
 
         if type == "hipass":
-            c = math.tan(math.pi * cutoff_frequency / self.sampling_rate)
 
-            a1 = 1.0 / (1.0 + resonance * c + c * c)
-            a2 = -2 * a1
-            a3 = a1
-            b1 = 2.0 * (c * c - 1.0) * a1
-            b2 = (1.0 - resonance * c + c * c) * a1
+            m_fb0 = (1 + math.cos(w0)) / 2
+            m_fb1 = -(1 + math.cos(w0))
+            m_fb2 = (1 + math.cos(w0)) / 2
+            m_fa0 = 1 + alpha
+            m_fa1 = -2 * math.cos(w0)
+            m_fa2 = 1 - alpha
 
-        for i in range(outputSamps):
-            s = x[i]
-            ringBuf.pushSample(s)
-            y[i] = s * BL + ringBuf.delayedSample(delaySamps) * FF
+        if type == "bandpass":
+            m_fb0 = alpha
+            m_fb1 = 0
+            m_fb2 = -1 * alpha
+            m_fa0 = 1 + alpha
+            m_fa1 = -2 * math.cos(w0)
+            m_fa2 = 1 - alpha
 
-            phi = phi + deltaPhi
-            while phi >= 1:
-                phi -= 1
+        if type == "allpass":
+            m_fb0 = 1 - alpha
+            m_fb1 = -2 * math.cos(w0)
+            m_fb2 = 1 + alpha
+            m_fa0 = 1 + alpha
+            m_fa1 = -2 * math.cos(w0)
+            m_fa2 = 1 - alpha
+
+        if type == "peak":
+            m_fb0 = 1 + alpha * A
+            m_fb1 = -2 * math.cos(w0)
+            m_fb2 = 1 - alpha * A
+            m_fa0 = 1 + alpha / A
+            m_fa1 = -2 * math.cos(w0)
+            m_fa2 = 1 - alpha / A
+
+        if type == "notch":
+            m_fb0 = 1
+            m_fb1 = -2 * math.cos(w0)
+            m_fb2 = 1
+            m_fa0 = 1 + alpha
+            m_fa1 = -2 * math.cos(w0)
+            m_fa2 = 1 - alpha
+
+        if type == "lowshelf":
+            m_fb0 = A * ((A + 1) - (A - 1) * math.cos(w0) + 2 * math.sqrt(A) * alpha)
+            m_fb1 = 2 * A * ((A - 1) - (A + 1) * math.cos(w0))
+            m_fb2 = A * ((A + 1) - (A - 1) * math.cos(w0) - 2 * math.sqrt(A) * alpha)
+            m_fa0 = (A + 1) + (A - 1) * math.cos(w0) + 2 * math.sqrt(A) * alpha
+            m_fa1 = -2 * ((A - 1) + (A + 1) * math.cos(w0))
+            m_fa2 = (A + 1) + (A - 1) * math.cos(w0) - 2 * math.sqrt(A) * alpha
+
+        if type == "highshelf":
+            m_fb0 = A * ((A + 1) + (A - 1) * math.cos(w0) + 2 * math.sqrt(A) * alpha)
+            m_fb1 = -2 * A * ((A - 1) + (A + 1) * math.cos(w0))
+            m_fb2 = A * ((A + 1) + (A - 1) * math.cos(w0) - 2 * math.sqrt(A) * alpha)
+            m_fa0 = (A + 1) - (A - 1) * math.cos(w0) + 2 * math.sqrt(A) * alpha
+            m_fa1 = 2 * ((A - 1) - (A + 1) * math.cos(w0))
+            m_fa2 = (A + 1) - (A - 1) * math.cos(w0) - 2 * math.sqrt(A) * alpha
+
+        for i in range(output_length):
+            output_sample = (m_fb0 / m_fa0) * x[i] + (m_fb1 / m_fa0) * m_fxn1 + (m_fb2 / m_fa0) * m_fxn2 - (m_fa1 / m_fa0) * m_fyn1 - (m_fa2 / m_fa0) * m_fyn2
+
+            m_fxn2 = m_fxn1
+            m_fxn1 = x[i]
+            m_fyn2 = m_fyn1
+            m_fyn1 = output_sample
+
+            y[i] = gain * output_sample
 
         return y

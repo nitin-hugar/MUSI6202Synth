@@ -5,31 +5,23 @@ from music21 import *
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="DSP Synth Implementation")
+    synth_parser = argparse.ArgumentParser(description="Synth type parser")
+    synth_subparser = synth_parser.add_subparsers(help='commands')
 
-    subparsers = parser.add_subparsers(help='commands')
+    synth_parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
+    synth_parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
+    synth_parser.add_argument('--samplerate', type=int, metavar='', required=False, help='Output Sample Rate')
+    synth_parser.add_argument('--bitrate', type=int, metavar='', required=False, help='Output Bit Rate')
 
-    # Additive:
-    parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
-    # parser.add_argument('-w', '--wavetype', type=str, metavar='', required=True, help='Type of wave')
-    parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
-    parser.add_argument('--samplerate', type=int, metavar='', required=True, help='Output Sample Rate')
-    parser.add_argument('--bitrate', type=int, metavar='', required=True, help='Output Bit Rate')
+    inserts = synth_subparser.add_parser('inserts', help='Add effects to the sound')
+    inserts.add_argument('-c', '--chorus',action='store_true', help='Add Chorus')
+    inserts.add_argument('-f', '--flanger', action='store_true', help='Add Flanger')
+    inserts.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
+    inserts.add_argument('-e', '--echo', action='store_true', help='Add Echo')
+    inserts.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
+    inserts.add_argument('--filter', action='store_true', help='Add Filter')
 
-    # Granular:
-
-
-    # Effects Group
-    fx = subparsers.add_parser('effects', help='Add effects to the sound')
-    # action=true stores false until the value is called
-    fx.add_argument('-c', '--chorus',action='store_true', help='Add Chorus')
-    fx.add_argument('-f', '--flanger', action='store_true', help='Add Flanger')
-    fx.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
-    fx.add_argument('-e', '--echo', action='store_true', help='Add Echo')
-    fx.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
-    fx.add_argument('--lowpass', action='store_true', help='Add Low-Pass Filter')
-
-    return parser.parse_args()
+    return synth_parser.parse_args()
 
 
 class Notes:

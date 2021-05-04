@@ -6,6 +6,7 @@ import soundfile as sf
 import utils
 from filters import *
 
+
 class Effects:
     def __init__(self, data, sampling_rate):
         self.data = data
@@ -177,6 +178,7 @@ class Effects:
 
         self.data = dry_signal + wet_signal + x_zp
 
-    def filter(self, type, resonance, cutoff):
-        filt = Filters(self.data, self.sampling_rate)
-        self.data = filt.biquad(type, resonance, cutoff)
+    def filters(self, type="lowpass", gain=1.0, center_frequency=100, Q=0.8):
+        filter = Filters(self.data, self.sampling_rate)
+        self.data = filter.biquad(type, gain, center_frequency, Q)
+
