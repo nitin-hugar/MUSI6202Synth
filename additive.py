@@ -13,7 +13,7 @@ from math import ceil
 SAMPLING_RATE = 48000
 
 if __name__ == '__main__':
-    args = parse_arguments()
+    args = parse_additive_arguments()
     print(args)
 
     # Get the input midi file:
@@ -42,7 +42,6 @@ if __name__ == '__main__':
         coefficients= [1] * len(partials)
         print("Adding default coefficients: ",coefficients)
     
-    print(partials, coefficients)
     if (len(partials) == len(coefficients)):    
         sound = synth.additive(args.envelope, partials, coefficients)
     else:
@@ -56,6 +55,8 @@ if __name__ == '__main__':
     sound = pyln.normalize.loudness(sound, loudness, -24.0)
     
     fx = effects.Effects(sound, SAMPLING_RATE)
+    filt = filters.Filters(sound, SAMPLING_RATE)
+
     print("Processing effects....")
     for key, value in vars(args).items():
         if key == 'chorus' and value is True:
@@ -143,18 +144,118 @@ if __name__ == '__main__':
             else:
                 raise ValueError("Enter 'y' or 'n'")
         
-        # elif key == 'lowpass' and value is True:
-        #     val = input("Enter lowpass filter parameters? (y/n): ")
-        #     if val == 'y':
-        #         resonance = float(input("Resonance: "))
-        #         cutoff_freq = float(input("Cutoff Frequency: "))
-        #         biquad(self, type="lowpass", gain=1.0, center_frequency=100, Q=1.0):
-        #     elif val == 'n':
-        #         print("Adding Lowpass filter...")
-        #         filt.biquad()
-        #         print('Lowpass filter added')
-        #     else:
-        #         raise ValueError("Enter 'y' or 'n'")
+        elif key == 'lowpass' and value is True:
+            val = input("Enter lowpass filter parameters? (y/n): ")
+            if val == 'y':
+                Q = float(input("Q: "))
+                center_freq = float(input("Center Frequency: "))
+                gain = float(input("Gain: "))
+                filt.biquad("lowpass", gain, center_freq, Q)
+            elif val == 'n':
+                print("Adding Lowpass filter...")
+                filt.biquad(type="lowpass")
+                print('Lowpass filter added')
+            else:
+                raise ValueError("Enter 'y' or 'n'")
+
+        elif key == 'hipass' and value is True:
+            val = input("Enter hipass filter parameters? (y/n): ")
+            if val == 'y':
+                Q = float(input("Q: "))
+                center_freq = float(input("Center Frequency: "))
+                gain = float(input("Gain: "))
+                filt.biquad("hipass", gain, center_freq, Q)
+            elif val == 'n':
+                print("Adding Highpass filter...")
+                filt.biquad(type="hipass")
+                print('Hipass filter added')
+            else:
+                raise ValueError("Enter 'y' or 'n'")
+
+        elif key == 'allpass' and value is True:
+            val = input("Enter allpass filter parameters? (y/n): ")
+            if val == 'y':
+                Q = float(input("Q: "))
+                center_freq = float(input("Center Frequency: "))
+                gain = float(input("Gain: "))
+                filt.biquad("allpass", gain, center_freq, Q)
+            elif val == 'n':
+                print("Adding Allpass filter...")
+                filt.biquad(type="allpass")
+                print('Allpass filter added')
+            else:
+                raise ValueError("Enter 'y' or 'n'")
+
+        elif key == 'bandpass' and value is True:
+            val = input("Enter bandpass filter parameters? (y/n): ")
+            if val == 'y':
+                Q = float(input("Q: "))
+                center_freq = float(input("Center Frequency: "))
+                gain = float(input("Gain: "))
+                filt.biquad("bandpass", gain, center_freq, Q)
+            elif val == 'n':
+                print("Adding Bandpass filter...")
+                filt.biquad(type="bandpass")
+                print('Bandpass filter added')
+            else:
+                raise ValueError("Enter 'y' or 'n'")
+
+        elif key == 'notch' and value is True:
+            val = input("Enter notch filter parameters? (y/n): ")
+            if val == 'y':
+                Q = float(input("Q: "))
+                center_freq = float(input("Center Frequency: "))
+                gain = float(input("Gain: "))
+                filt.biquad("notch", gain, center_freq, Q)
+            elif val == 'n':
+                print("Adding Notch filter...")
+                filt.biquad(type="notch")
+                print('Notch filter added')
+            else:
+                raise ValueError("Enter 'y' or 'n'")
+
+        elif key == 'peak' and value is True:
+            val = input("Enter peak filter parameters? (y/n): ")
+            if val == 'y':
+                Q = float(input("Q: "))
+                center_freq = float(input("Center Frequency: "))
+                gain = float(input("Gain: "))
+                filt.biquad("peak", gain, center_freq, Q)
+            elif val == 'n':
+                print("Adding Peak filter...")
+                filt.biquad(type="peak")
+                print('Peak filter added')
+            else:
+                raise ValueError("Enter 'y' or 'n'")
+
+        elif key == 'highshelf' and value is True:
+            val = input("Enter high shelf filter parameters? (y/n): ")
+            if val == 'y':
+                Q = float(input("Q: "))
+                center_freq = float(input("Center Frequency: "))
+                gain = float(input("Gain: "))
+                filt.biquad("highshelf", gain, center_freq, Q)
+            elif val == 'n':
+                print("Adding High shelf filter...")
+                filt.biquad(type="highshelf")
+                print('High shelf filter added')
+            else:
+                raise ValueError("Enter 'y' or 'n'")
+
+        elif key == 'lowshelf' and value is True:
+            val = input("Enter low shelf filter parameters? (y/n): ")
+            if val == 'y':
+                Q = float(input("Q: "))
+                center_freq = float(input("Center Frequency: "))
+                gain = float(input("Gain: "))
+                filt.biquad("lowshelf", gain, center_freq, Q)
+            elif val == 'n':
+                print("Adding Low shelf filter...")
+                filt.biquad(type="lowshelf")
+                print('Low shelf filter added')
+            else:
+                raise ValueError("Enter 'y' or 'n'")
+
     output = Downsampler()
     res = sound
 
