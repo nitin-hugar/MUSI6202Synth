@@ -4,6 +4,7 @@ import numpy as np
 import math
 import soundfile as sf
 import utils
+import filters
 
 class Effects:
     def __init__(self, data, sampling_rate):
@@ -177,3 +178,7 @@ class Effects:
             wet_signal = np.pad(wet_signal, (0, pad_length), 'constant')
 
         self.data = dry_signal + wet_signal + x_zp
+
+    def filters(self, type="lowpass", gain=1.0, center_frequency=100, Q=0.8):
+        filter = filters.Filters(self.data, self.sampling_rate)
+        self.data = filter.biquad(type,gain, center_frequency,Q)

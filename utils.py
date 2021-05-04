@@ -5,36 +5,38 @@ from music21 import *
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="DSP Synth Implementation")
-
-    subparsers = parser.add_subparsers(help='commands')
+    synth_parser = argparse.ArgumentParser(description="Synth type parser")
+    synth_subparser = synth_parser.add_subparsers(help='commands')
 
     # Additive:
-    parser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
-    parser.add_argument('-w', '--wavetype', type=str, metavar='', required=True, help='Type of wave')
-    parser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
+    synth_subparser.add_argument('-i', '--input', type=str, metavar='', required=True, help='Input path of midi file')
+    synth_subparser.add_argument('-w', '--wavetype', type=str, metavar='', required=True, help='Type of wave')
+    synth_subparser.add_argument('--envelope', nargs=4, type=float, metavar='', required=True, help='Add ADSR Envelope')
     # Granular:
 
+    fx_parser = argparse.ArgumentParser()
     # Effects Group
-    fx = subparsers.add_parser('effects', help='Add effects to the sound')
+    fx = fx_parser.add_parser('effects', help='Add effects to the sound')
     # action=true stores false until the value is called
-    fx.add_argument('-c', '--chorus',action='store_true', help='Add Chorus')
-    fx.add_argument('-f', '--flanger', action='store_true', help='Add Flanger')
-    fx.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
-    fx.add_argument('-e', '--echo', action='store_true', help='Add Echo')
-    fx.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
+    fx_parser.add_argument('-c', '--chorus',action='store_true', help='Add Chorus')
+    fx_parser.add_argument('-f', '--flanger', action='store_true', help='Add Flanger')
+    fx_parser.add_argument('-v', '--vibrato', action='store_true', help='Add Vibrato')
+    fx_parser.add_argument('-e', '--echo', action='store_true', help='Add Echo')
+    fx_parser.add_argument('-r', '--reverb', action='store_true', help='Add Reverb')
 
     #Filters Group
-    filt = subparsers.add_parser('filters', help='Add filter to the sound')
+    filt_parser = argparse.ArgumentParser()
 
-    filt.add_argument('-lp', '--lowpass', action='store_true', help='Add lowpass filter')
-    filt.add_argument('-hp', '--hipass', action='store_true', help='Add hipass filter')
-    filt.add_argument('-bp', '--bandpass', action='store_true', help='Add hipass filter')
-    filt.add_argument('-ap', '--allpass', action='store_true', help='Add hipass filter')
-    filt.add_argument('-pk', '--peak', action='store_true', help='Add hipass filter')
-    filt.add_argument('-nt', '--notch', action='store_true', help='Add hipass filter')
-    filt.add_argument('-hs', '--highshelf', action='store_true', help='Add hipass filter')
-    filt.add_argument('-ls', '--lowshelf', action='store_true', help='Add hipass filter')
+    filt_subparser = filt_parser.add_parser('filters', help='Add filter to the sound')
+
+    filt_subparser.add_argument('-lp', '--lowpass', action='store_true', help='Add lowpass filter')
+    filt_subparser.add_argument('-hp', '--hipass', action='store_true', help='Add hipass filter')
+    filt_subparser.add_argument('-bp', '--bandpass', action='store_true', help='Add hipass filter')
+    filt_subparser.add_argument('-ap', '--allpass', action='store_true', help='Add hipass filter')
+    filt_subparser.add_argument('-pk', '--peak', action='store_true', help='Add hipass filter')
+    filt_subparser.add_argument('-nt', '--notch', action='store_true', help='Add hipass filter')
+    filt_subparser.add_argument('-hs', '--highshelf', action='store_true', help='Add hipass filter')
+    filt_subparser.add_argument('-ls', '--lowshelf', action='store_true', help='Add hipass filter')
 
     return parser.parse_args()
 

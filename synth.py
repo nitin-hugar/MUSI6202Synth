@@ -10,7 +10,6 @@ import soundfile as sf
 
 SAMPLING_RATE = 48000
 
-
 if __name__ == '__main__':
     args = parse_arguments()
     print(args)
