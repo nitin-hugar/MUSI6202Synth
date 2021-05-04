@@ -4,6 +4,7 @@ import numpy as np
 import math
 import soundfile as sf
 import utils
+from filters import *
 
 class Effects:
     def __init__(self, data, sampling_rate):
@@ -29,7 +30,7 @@ class Effects:
         if A > M:
             raise RuntimeError("Amplitude of vibrato too high for delay length")
 
-        maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
+        maxDelaySamps = M + A + 2
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
         ringBuf = utils.LinearRingBuffer(maxDelaySamps)
@@ -68,7 +69,7 @@ class Effects:
         if A > M:
             raise RuntimeError("Amplitude of vibrato too high for delay length")
 
-        maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
+        maxDelaySamps = M + A + 2
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
         ringBuf = utils.LinearRingBuffer(maxDelaySamps)
@@ -175,3 +176,7 @@ class Effects:
             wet_signal = np.pad(wet_signal, (0, pad_length), 'constant')
 
         self.data = dry_signal + wet_signal + x_zp
+
+    def filter(self, type, resonance, cutoff):
+        filt = Filters(self.data, self.sampling_rate)
+        self.data = filt.biquad(type, resonance, cutoff)
