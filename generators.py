@@ -7,22 +7,34 @@ class Generators:
         self.frequencies = notes.frequencies
         self.durations = notes.durations
         self.fs = fs
-        self.amplitude = 0.4
+        self.amplitude = 1
         self.numOfNotes = len(notes.frequencies)
 
 
     def make_sound(self, envelope, partials, coefficients):
         sound = []
-        for i in np.arange(self.numOfNotes):
+
+        # for i in np.arange(self.numOfNotes):
+        #     omega = 2 * np.pi * self.frequencies[i]
+        #     t = np.arange(0, float(self.durations[i]), float(1 / self.fs))
+        #     signal = 0
+        #     for k in range(0, len(partials)):
+        #         signal += (1/partials[k]) * np.sin(k * omega * t)
+        #         x = self.amplitude * coefficients[k] * (4/np.pi) * signal
+        #         env = ADSR.getadsr(x, envelope)
+        #         x_env = x * env[:len(x)]
+        #         sound.extend(x_env)
+
+        for i in range(self.numOfNotes):
             omega = 2 * np.pi * self.frequencies[i]
-            t = np.arange(0, float(self.durations[i]), float(1 / self.fs))
-            signal = 0
-            for k in range(0, len(partials)):
-                signal += (1/partials[k]) * np.sin(k * omega * t)
-                x = coefficients[k] * (4/np.pi)* signal
-                env = ADSR.getadsr(x, envelope)
-                x_env = x * env[:len(x)]
+            t = np.arange(0, float(self.durations[i]), float(1/self.fs))
+            x = self.amplitude * np.sin(omega * t)
+            env = ADSR.getadsr(x, envelope)
+            x_env = x * env[:len(x)]
             sound.extend(x_env)
+        return np.array(sound)
+
+
             
             # if signalType == 'sine':
             #     x = self.amplitude * np.sin(omega * t)
@@ -48,7 +60,7 @@ class Generators:
             #         x_env = x * env[:len(x)]
             #     sound.extend(x_env)
 
-        return np.array(sound)
+        # return np.array(sound)
 
 
 

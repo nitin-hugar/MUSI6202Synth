@@ -2,12 +2,12 @@
 
 from generators import Generators
 import effects
-import pyloudnorm as pyln
-import matplotlib.pyplot as plt
 from utils import *
-import soundfile as sf
 from postprocessing import *
 from math import ceil
+import soundfile as sf
+import pyloudnorm as pyln
+
 
 SAMPLING_RATE = 48000
 
@@ -23,34 +23,14 @@ if __name__ == '__main__':
     # Generate sound
     print("Generating sound....")
     synth = Generators(notes, SAMPLING_RATE)
-    partials = []
-    coefficients = []
-    for key, value in vars(args).items():
-        if key == 'additive' and value is True:
-            val = input("Enter values of partials and Cofficients? (y/n): ")
-            if val == 'y':
-                partials = input("Enter a space-separated list of partials: ").split()
-                partials = list(map(float, partials))
-                coefficients = input("Enter a space-separated list of partials: ").split()
-                coefficients = list(map(float, coefficients))
-            elif val == 'n':
-                partials=[1, 2, 3, 4]
-                print("Adding default partials: ", partials)
-                coefficients = [1] * len(partials)
-                print("Adding default coefficients: ", coefficients)
 
-    print(partials, coefficients)
+    partials = [1, 2, 3, 4]
+    coefficients = [1] * len(partials)
+
     if len(partials) == len(coefficients):
         sound = synth.make_sound(args.envelope, partials, coefficients)
     else:
         raise ValueError("Number of partials not equal to number of coefficeints")
-
-
-    # set loudness to -12 LUFS
-    print("Setting loudness to -12 LUFS....")
-    meter = pyln.Meter(SAMPLING_RATE)
-    loudness = meter.integrated_loudness(sound)
-    sound = pyln.normalize.loudness(sound, loudness, -24.0)
 
     fx = effects.Effects(sound, SAMPLING_RATE)
     print("Processing effects....")
@@ -140,22 +120,31 @@ if __name__ == '__main__':
             else:
                 raise ValueError("Enter 'y' or 'n'")
 
-    # Down sampling and Down quantization
-    sound = np.asarray(fx.data, dtype=np.int32)
-    sound = sound.astype(np.int32)
+#Normalize Audio:
+sound = fx.data
+flag = max(sound) if max(sound) else 1
+x =  np.divide(sound, flag)
+x = x * np.iinfo(np.int32).max
+x = x.astype(np.int32)
 
-    output = Downsampler()
-    res = sound
+data = np.asarray(x, dtype=np.int32)
+sampling = Downsampler()
+output = data
 
-    if args.samplerate is not None:
-        output.output_fs = int(args.samplerate)
-        down_factor = ceil(SAMPLING_RATE / float(output.output_fs))
-        t = len(sound) / SAMPLING_RATE
-        down_sampled_data = output.down_sample(sound, down_factor, output.output_fs, SAMPLING_RATE)
-        res = output.up_sample(down_sampled_data, int(SAMPLING_RATE / down_factor), output.output_fs, t)
+print("Setting Sampling Rate to %s...." %args.samplerate)
+if args.samplerate is not None:
+    sampling.output_fs = int(args.samplerate)
 
-    if args.bitrate is not None:
-        output.output_br = int(args.bitrate)
-        dq1 = output.down_quantization(res, 32, output.output_br)
+    down_factor = ceil(SAMPLING_RATE / float(sampling.output_fs))
+    t = len(output) / SAMPLING_RATE
+    down_sampled_data = sampling.down_sample(output, down_factor, sampling.output_fs, SAMPLING_RATE)
+    output = sampling.up_sample(down_sampled_data, int(SAMPLING_RATE / down_factor), sampling.output_fs, t)
 
-    print("Done!!")
+print("Setting Bitrate to %s...." %args.bitrate)
+if args.bitrate is not None:
+    sampling.output_br = int(args.bitrate)
+    output = sampling.down_quantization(output, 32, sampling.output_br)
+
+output_path = '../output/output1.wav'
+print("Writing output to %s" %output_path)
+sampling.write_wav(output_path, output, sampling.output_fs, sampling.output_br)

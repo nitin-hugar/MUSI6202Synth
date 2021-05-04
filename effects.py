@@ -22,7 +22,7 @@ class Effects:
         """
 
         # Simple Chorus
-        x = util.LinearWrap(self.data)
+        x = utils.LinearWrap(self.data)
         A = int(A * self.sampling_rate)
         M = int(M * self.sampling_rate)
 
@@ -32,7 +32,7 @@ class Effects:
         maxDelaySamps = M + A + 2  # Probably don't need the 2 here, but being safe
         outputSamps = len(x) + maxDelaySamps
         y = np.zeros(outputSamps)
-        ringBuf = util.LinearRingBuffer(maxDelaySamps)
+        ringBuf = utils.LinearRingBuffer(maxDelaySamps)
         deltaPhi = fmod / self.sampling_rate
         phi = 0
 
@@ -154,7 +154,7 @@ class Effects:
 
         self.data = y
 
-    def conv_reverb(self, impulse_path, amount_verb=0.2):
+    def conv_reverb(self, impulse_path, amount_verb=0.4):
 
         impulse = sf.read(impulse_path, self.sampling_rate)[0]
         impulse = impulse[:, 0]
