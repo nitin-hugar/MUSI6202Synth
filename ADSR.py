@@ -5,19 +5,19 @@ sampling_rate = 48000
 
 def adsr(sound, envelope):
     """
-  Linear ADSR envelope.
-  Parameters
-  ----------
-  sound : audio data.
-  a :"Attack" time, in seconds.
-  d : "Decay" time, in seconds.
-  s : "Sustain" amplitude level
-  r : "Release" time, in seconds.
+    Linear ADSR envelope.
+    Parameters
+    ----------
+    sound : audio data.
+    a :"Attack" time, in seconds.
+    d : "Decay" time, in seconds.
+    s : "Sustain" amplitude level
+    r : "Release" time, in seconds.
 
-  Returns
-  -------
-    ADSR Envelop
-  """
+    Returns
+    -------
+        ADSR Envelope
+    """
     a, d, s, r = envelope
 
     attack = a * sampling_rate
