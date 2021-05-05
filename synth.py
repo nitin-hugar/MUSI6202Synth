@@ -16,9 +16,12 @@ if __name__ == '__main__':
     print("Getting notes from Midi....")
     path = args.input
     notes = Notes(path)
-    envelope = input("Enter space-seperated list of ADSR envelope values (0-1): ").split()
-    adsr = list(map(float, envelope))
-    print(adsr)
+    val = input("Enter values for ADSR envelope? (y/n): ")
+    if val == 'y':
+        envelope = input("Enter space-seperated list of ADSR envelope values (0-1): ").split()
+        adsr = list(map(float, envelope))
+    elif val == 'n':
+        adsr = [0.3, 0.2, 0.7, 0.2]
 
     # Generate sound with Additive synth
     print("Generating sound with Additive Synth....")
@@ -148,7 +151,7 @@ if __name__ == '__main__':
                 print("Types: lowpass, hipass, bandpass, allpass, notch, peak, hishelf, lowshelf")
                 type = input("Filter type (default:lowpass):")
                 gain = float(input("Gain (default:1.0):"))
-                center_frequency = float(input("Center Frequency (default:100):"))
+                center_frequency = float(input("Center Frequency (default:2000):"))
                 Q = float(input("Q Factor (default:0.8):"))
                 print("Adding filter....")
                 inserts.filters(type, gain, center_frequency, Q)
