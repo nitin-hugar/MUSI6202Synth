@@ -179,8 +179,14 @@ if __name__ == '__main__':
             sound = synth.granular(sound, gs, hs, ts, fs, tv, fv)
         elif custom_val == 'n':
             sound = synth.granular(sound)
+
     elif val == 'n':
         print('Bypassing granular synth')
+
+    # Smoothing filter
+    kernel_size = 10
+    kernel = np.ones(kernel_size) / kernel_size
+    sound = np.convolve(sound, kernel, mode='same')
 
     # Normalize Audio
     flag = max(sound) if max(sound) else 1
