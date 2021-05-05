@@ -55,4 +55,9 @@ Writing output to output/output1.wav
 
 Note: Sum of ADR values in the envelope < 1.0
 
-Outputs are written as .wav files to `\output`
+Outputs are written as .wav files to `output`
+
+### Results
+
+The results are generated with varying parameters and stored under `output`
+
