@@ -182,7 +182,7 @@ class Inserts:
 
         self.data = dry_signal + wet_signal + x_zp
 
-    def filters(self, type="lowpass", gain=1.0, center_frequency=100, Q=0.8):
+    def filters(self, type="lowpass", gain=1.0, center_frequency=2000, Q=0.8):
         filter = Filters(self.data, self.sampling_rate)
         self.data = filter.biquad(type, gain, center_frequency, Q)
 
