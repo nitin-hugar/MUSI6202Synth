@@ -15,7 +15,7 @@ This repository is a basic implementation of an Additive and Granular Synth in P
 python3 synth.py --input input/kiss.mid --samplerate 44100 --bitrate 32 inserts --reverb --flanger --vibrato --echo --filter
 ```
 
-Paramter values for inserts and granular synth can be customized in runtime.
+Parameter values for inserts and granular synth can be customized in runtime.
 
 Example Command Line Interface:
 
@@ -64,7 +64,7 @@ Setting Bitrate to 32
 Writing output to output/output1.wav
 ```
 
-Note: Sum of ADR values in the envelope < 1.0
+**Note**: Sum of Attack, Decay, Release coefficient values in the envelope should be < 1.0
 
 Outputs are written as .wav files to `output`
 
